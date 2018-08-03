@@ -32,4 +32,5 @@ module "rds_mysql" {
   storage_encrypted          = true                               #  Parameter defaults to false, but enabled for Cross Region Replication example
   password                   = "${random_string.password.result}" #  Required
   existing_option_group_name = "default:mysql-5-7"
+  skip_final_snapshot        = true
 }
