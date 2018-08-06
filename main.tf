@@ -282,7 +282,7 @@ resource "aws_db_instance" "db_instance" {
   allow_major_version_upgrade = false
   auto_minor_version_upgrade  = "${var.auto_minor_version_upgrade}"
   maintenance_window          = "${var.maintenance_window}"
-  skip_final_snapshot         = "${local.read_replica}"
+  skip_final_snapshot         = "${local.read_replica || var.skip_final_snapshot}"
   copy_tags_to_snapshot       = "${var.copy_tags_to_snapshot}"
   final_snapshot_identifier   = "${var.name}-final-snapshot"
   backup_retention_period     = "${local.read_replica ? 0 : var.backup_retention_period}"

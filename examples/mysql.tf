@@ -1,6 +1,6 @@
 module "rds_mysql" {
   # This needs to be updated once a permanent home is found
-  source = "c:\\cftemplates\\aws-terraform-internal\\aviator\\rds"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v1.0.0"
 
   ##################
   # VPC Configuration

@@ -257,6 +257,12 @@ variable "license_model" {
   default     = ""
 }
 
+variable "skip_final_snapshot" {
+  description = "Boolean value to control if the DB instance will take a final snapshot when destroyed.  This value should be set to false if a final snapshot is desired."
+  type        = "string"
+  default     = false
+}
+
 variable "source_db" {
   description = "The ID of the source DB instance.  For cross region replicas, the full ARN should be provided"
   default     = ""
