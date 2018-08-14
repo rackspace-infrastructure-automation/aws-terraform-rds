@@ -1,3 +1,30 @@
+/**
+ * # aws-terraform-rds
+ *
+ *This module creates an RDS instance.  It currently supports master, replica, and cross region replica RDS instances.
+ *
+ *## Basic Usage
+ *
+ *```
+ *module "rds" {
+ *  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.1"
+ *
+ *  subnets           = "${module.vpc.private_subnets}" #  Required
+ *  security_groups   = ["${module.vpc.default_sg}"]    #  Required
+ *  name              = "sample-mysql-rds"              #  Required
+ *  engine            = "mysql"                         #  Required
+ *  instance_class    = "db.t2.large"                   #  Required
+ *  storage_encrypted = true                            #  Parameter defaults to false, but enabled for Cross Region Replication example
+ *  password = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
+ *}
+ *```
+ *
+ * Full working references are available at [examples](examples)
+ * ## Limitations
+ *
+ * - Terraform does not support joining a Microsoft SQL RDS instance to a Directory Service at this time.  This has been requested in https://github.com/terraform-providers/terraform-provider-aws/pull/5378 and can be added once that functionality is present.
+ */
+
 data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
@@ -72,8 +99,7 @@ locals {
 
   options = []
 
-  read_replica        = "${var.source_db != ""}"
-  same_region_replica = "${local.read_replica && length(split(":", var.source_db)) == 1}"
+  same_region_replica = "${var.read_replica && length(split(":", var.source_db)) == 1}"
 
   # Break up the engine version in to chunks to get the major version part.  This is a single number for postgresql (ex: 10)
   # and two numbers for all other engines (ex: 5.7).
@@ -91,8 +117,8 @@ locals {
   customer_alarm_topic = "${ list( list(), list(var.notification_topic) ) }"
 
   # Only create 5th alarm for replica lag when the instance has a source DB
-  customer_alarm_count = "${var.source_db == "" ? 4 : 5}"
-  notification_set     = "${ var.notification_topic == "" ? 0 : 1 }"
+  customer_alarm_count = "${var.read_replica ? 5 : 4}"
+  notification_set     = "${ var.customer_notifications_enabled ? 1 : 0 }"
 
   customer_alarms = [
     {
@@ -140,7 +166,7 @@ locals {
   rs_alarm_topic = "arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rackspace-support-urgent"
 
   # Only create replica lag alarm if we have a source DB and rackspace_alarms_enabled is true
-  rs_alarm_count = "${var.source_db == "" || ! var.rackspace_alarms_enabled ? 1 : 2}"
+  rs_alarm_count = "${var.read_replica && var.rackspace_alarms_enabled ? 2 : 1}"
 
   rs_alarms = [
     {
@@ -163,7 +189,7 @@ locals {
 }
 
 resource "aws_db_subnet_group" "db_subnet_group" {
-  count = "${var.existing_subnet_group == "" ? 1 : 0}"
+  count = "${var.create_subnet_group ? 1 : 0}"
 
   name_prefix = "${var.name}-"
   description = "Database subnet group for ${var.name}"
@@ -177,7 +203,7 @@ resource "aws_db_subnet_group" "db_subnet_group" {
 }
 
 resource "aws_db_parameter_group" "db_parameter_group" {
-  count = "${var.existing_parameter_group_name == "" ? 1 : 0}"
+  count = "${var.create_parameter_group ? 1 : 0}"
 
   name_prefix = "${var.name}-"
   description = "Database parameter group for ${var.name}"
@@ -193,7 +219,7 @@ resource "aws_db_parameter_group" "db_parameter_group" {
 }
 
 resource "aws_db_option_group" "db_option_group" {
-  count = "${var.existing_option_group_name == "" ? 1 : 0}"
+  count = "${var.create_option_group ? 1 : 0}"
 
   name_prefix              = "${var.name}-"
   option_group_description = "Option group for ${var.name}"
@@ -273,7 +299,7 @@ resource "aws_db_instance" "db_instance" {
   db_subnet_group_name   = "${local.same_region_replica ? "" : local.subnet_group}"
   parameter_group_name   = "${local.same_region_replica ? "" : local.parameter_group}"
   option_group_name      = "${local.same_region_replica ? "" : local.option_group}"
-  multi_az               = "${local.read_replica ? false : var.multi_az}"
+  multi_az               = "${var.read_replica ? false : var.multi_az}"
   publicly_accessible    = "${var.publicly_accessible}"
 
   monitoring_interval = "${var.monitoring_interval}"
@@ -282,10 +308,10 @@ resource "aws_db_instance" "db_instance" {
   allow_major_version_upgrade = false
   auto_minor_version_upgrade  = "${var.auto_minor_version_upgrade}"
   maintenance_window          = "${var.maintenance_window}"
-  skip_final_snapshot         = "${local.read_replica || var.skip_final_snapshot}"
+  skip_final_snapshot         = "${var.read_replica || var.skip_final_snapshot}"
   copy_tags_to_snapshot       = "${var.copy_tags_to_snapshot}"
   final_snapshot_identifier   = "${var.name}-final-snapshot"
-  backup_retention_period     = "${local.read_replica ? 0 : var.backup_retention_period}"
+  backup_retention_period     = "${var.read_replica ? 0 : var.backup_retention_period}"
   backup_window               = "${var.backup_window}"
   apply_immediately           = "${var.apply_immediately}"
 
@@ -337,9 +363,36 @@ resource "aws_cloudwatch_metric_alarm" "customer_alarms" {
   statistic           = "Average"
   threshold           = "${lookup(local.customer_alarms[count.index], "threshold")}"
   alarm_description   = "${lookup(local.customer_alarms[count.index], "description")}"
-  alarm_actions       = "${local.customer_alarm_topic[local.notification_set]}"
+  alarm_actions       = ["${local.customer_alarm_topic[local.notification_set]}"]
 
   dimensions {
     DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
   }
+}
+
+resource "aws_db_event_subscription" "default" {
+  count = "${length(var.event_categories) > 0 ? 1 : 0}"
+
+  name_prefix      = "${var.name}-"
+  event_categories = "${var.event_categories}"
+  sns_topic        = "${element(local.customer_alarm_topic[local.notification_set], 0)}"
+  source_type      = "db-instance"
+  source_ids       = ["${aws_db_instance.db_instance.id}"]
+}
+
+data "aws_route53_zone" "hosted_zone" {
+  count = "${var.internal_record_name != "" ? 1 : 0}"
+
+  name         = "${var.internal_zone_name}"
+  private_zone = true
+}
+
+resource "aws_route53_record" "zone_record_alias" {
+  count = "${var.internal_record_name != "" ? 1 : 0}"
+
+  name    = "${var.internal_record_name}.${data.aws_route53_zone.hosted_zone.name}"
+  ttl     = "300"
+  type    = "CNAME"
+  zone_id = "${data.aws_route53_zone.hosted_zone.zone_id}"
+  records = ["${aws_db_instance.db_instance.address}"]
 }
