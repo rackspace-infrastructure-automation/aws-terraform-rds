@@ -1,4 +1,10 @@
 # VPC Configuration parameters
+variable "create_subnet_group" {
+  description = "A boolean variable noting if a new DB subnet group should be created."
+  type        = "string"
+  default     = true
+}
+
 variable "existing_subnet_group" {
   description = "The existing DB subnet group to use for this instance (OPTIONAL)"
   type        = "string"
@@ -113,6 +119,18 @@ variable "auto_minor_version_upgrade" {
   default     = true
 }
 
+variable "create_option_group" {
+  description = "A boolean variable noting if a new option group should be created."
+  type        = "string"
+  default     = true
+}
+
+variable "create_parameter_group" {
+  description = "A boolean variable noting if a new parameter group should be created."
+  type        = "string"
+  default     = true
+}
+
 variable "existing_option_group_name" {
   description = "The existing option group to use for this instance. (OPTIONAL)"
   type        = "string"
@@ -140,7 +158,7 @@ variable "kms_key_id" {
 variable "multi_az" {
   description = "Create a multi-AZ RDS database instance"
   type        = "string"
-  default     = false
+  default     = true
 }
 
 variable "options" {
@@ -191,6 +209,12 @@ variable "alarm_write_iops_limit" {
   description = "CloudWatch Write IOPSLimit Threshold"
   type        = "string"
   default     = 100
+}
+
+variable "customer_notifications_enabled" {
+  description = "Specifies whether customer notification alarms should be created."
+  type        = "string"
+  default     = false
 }
 
 variable "existing_monitoring_role" {
@@ -247,14 +271,37 @@ variable "environment" {
   default     = "Development"
 }
 
+variable "event_categories" {
+  description = "A list of RDS event categories.  Submissions will be made to the provided NotificationTopic for each matching event. Acceptable values can be found with the CLI command 'aws rds describe-event-categories' (OPTIONAL)"
+  type        = "list"
+  default     = []
+}
+
 variable "iam_authentication_enabled" {
   description = "Specifies whether or mappings of AWS Identity and Access Management (IAM) accounts to database accounts is enabled"
   default     = false
 }
 
+variable "internal_record_name" {
+  description = "Record Name for the new Resource Record in the Internal Hosted Zone. i.e. alb.aws.com"
+  type        = "string"
+  default     = ""
+}
+
+variable "internal_zone_name" {
+  description = "TLD for Internal Hosted Zone. i.e. mycompany.local"
+  type        = "string"
+  default     = ""
+}
+
 variable "license_model" {
   description = "License model information for this DB instance. Optional, but required for some DB engines, i.e. Oracle SE1"
   default     = ""
+}
+
+variable "read_replica" {
+  description = "Specifies whether this RDS instance is a read replica."
+  default     = false
 }
 
 variable "skip_final_snapshot" {
