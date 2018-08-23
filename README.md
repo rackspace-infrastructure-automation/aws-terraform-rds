@@ -41,7 +41,6 @@ Full working references are available at [examples](examples)
 | create_option_group | A boolean variable noting if a new option group should be created. | string | `true` | no |
 | create_parameter_group | A boolean variable noting if a new parameter group should be created. | string | `true` | no |
 | create_subnet_group | A boolean variable noting if a new DB subnet group should be created. | string | `true` | no |
-| customer_notifications_enabled | Specifies whether customer notification alarms should be created. | string | `false` | no |
 | db_snapshot_id | The name of a DB snapshot (optional). | string | `` | no |
 | dbname | The DB name to create. If omitted, no database is created initially | string | `` | no |
 | engine | Database Engine Type.  Allowed values: mariadb, mysql, oracle-ee, oracle-se, oracle-se1, oracle-se2, postgres, sqlserver-ee, sqlserver-ex, sqlserver-se, sqlserver-web | string | - | yes |

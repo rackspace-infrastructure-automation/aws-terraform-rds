@@ -211,12 +211,6 @@ variable "alarm_write_iops_limit" {
   default     = 100
 }
 
-variable "customer_notifications_enabled" {
-  description = "Specifies whether customer notification alarms should be created."
-  type        = "string"
-  default     = false
-}
-
 variable "existing_monitoring_role" {
   description = "ARN of an existing enhanced monitoring role to use for this instance. (OPTIONAL)"
   type        = "string"
