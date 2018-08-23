@@ -163,7 +163,19 @@ locals {
     },
   ]
 
-  rs_alarm_topic = "arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rackspace-support-urgent"
+  rs_alarm_topic         = ["arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rackspace-support-urgent"]
+  alarm_sns_notification = "${compact(list(var.notification_topic))}"
+  rs_alarm_option        = "${var.rackspace_managed ? "managed" : "unmanaged"}"
+
+  rs_alarm_action = {
+    managed   = "${local.rs_alarm_topic}"
+    unmanaged = "${local.alarm_sns_notification}"
+  }
+
+  rs_ok_action = {
+    managed   = "${local.rs_alarm_topic}"
+    unmanaged = []
+  }
 
   # Only create replica lag alarm if we have a source DB and rackspace_alarms_enabled is true
   rs_alarm_count = "${var.read_replica && var.rackspace_alarms_enabled ? 2 : 1}"
@@ -343,8 +355,8 @@ resource "aws_cloudwatch_metric_alarm" "rackspace_alarms" {
   statistic           = "Average"
   threshold           = "${lookup(local.rs_alarms[count.index], "threshold")}"
   alarm_description   = "${lookup(local.rs_alarms[count.index], "description")}"
-  alarm_actions       = ["${local.rs_alarm_topic}"]
-  ok_actions          = ["${local.rs_alarm_topic}"]
+  alarm_actions       = ["${local.rs_alarm_action[local.rs_alarm_option]}"]
+  ok_actions          = ["${local.rs_ok_action[local.rs_alarm_option]}"]
 
   dimensions {
     DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"

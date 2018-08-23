@@ -70,6 +70,7 @@ Full working references are available at [examples](examples)
 | port | The port on which the DB accepts connections | string | `` | no |
 | publicly_accessible | Boolean value that indicates whether the database instance is an Internet-facing instance. | string | `false` | no |
 | rackspace_alarms_enabled | Specifies whether non-emergency rackspace alarms will create a ticket. | string | `false` | no |
+| rackspace_managed | Boolean parameter controlling if instance will be fully managed by Rackspace support teams, created CloudWatch alarms that generate tickets, and utilize Rackspace managed SSM documents. | string | `true` | no |
 | read_replica | Specifies whether this RDS instance is a read replica. | string | `false` | no |
 | security_groups | A list of EC2 security groups to assign to this resource | list | - | yes |
 | skip_final_snapshot | Boolean value to control if the DB instance will take a final snapshot when destroyed.  This value should be set to false if a final snapshot is desired. | string | `false` | no |

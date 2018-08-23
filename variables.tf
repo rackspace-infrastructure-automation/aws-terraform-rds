@@ -299,6 +299,12 @@ variable "license_model" {
   default     = ""
 }
 
+variable "rackspace_managed" {
+  description = "Boolean parameter controlling if instance will be fully managed by Rackspace support teams, created CloudWatch alarms that generate tickets, and utilize Rackspace managed SSM documents."
+  type        = "string"
+  default     = true
+}
+
 variable "read_replica" {
   description = "Specifies whether this RDS instance is a read replica."
   default     = false
