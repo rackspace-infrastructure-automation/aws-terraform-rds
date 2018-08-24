@@ -114,11 +114,8 @@ locals {
   major_version_substring = "${local.is_mssql ? substr(local.major_version, 0, length(local.major_version) - 1) : local.major_version}"
   family                  = "${coalesce(var.family, join(local.family_separator, list(var.engine, local.major_version_substring)))}"
 
-  customer_alarm_topic = "${ list( list(), list(var.notification_topic) ) }"
-
   # Only create 5th alarm for replica lag when the instance has a source DB
   customer_alarm_count = "${var.read_replica ? 5 : 4}"
-  notification_set     = "${ var.customer_notifications_enabled ? 1 : 0 }"
 
   customer_alarms = [
     {
@@ -163,7 +160,19 @@ locals {
     },
   ]
 
-  rs_alarm_topic = "arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rackspace-support-urgent"
+  rs_alarm_topic         = ["arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rackspace-support-urgent"]
+  alarm_sns_notification = "${compact(list(var.notification_topic))}"
+  rs_alarm_option        = "${var.rackspace_managed ? "managed" : "unmanaged"}"
+
+  rs_alarm_action = {
+    managed   = "${local.rs_alarm_topic}"
+    unmanaged = "${local.alarm_sns_notification}"
+  }
+
+  rs_ok_action = {
+    managed   = "${local.rs_alarm_topic}"
+    unmanaged = []
+  }
 
   # Only create replica lag alarm if we have a source DB and rackspace_alarms_enabled is true
   rs_alarm_count = "${var.read_replica && var.rackspace_alarms_enabled ? 2 : 1}"
@@ -343,8 +352,8 @@ resource "aws_cloudwatch_metric_alarm" "rackspace_alarms" {
   statistic           = "Average"
   threshold           = "${lookup(local.rs_alarms[count.index], "threshold")}"
   alarm_description   = "${lookup(local.rs_alarms[count.index], "description")}"
-  alarm_actions       = ["${local.rs_alarm_topic}"]
-  ok_actions          = ["${local.rs_alarm_topic}"]
+  alarm_actions       = ["${local.rs_alarm_action[local.rs_alarm_option]}"]
+  ok_actions          = ["${local.rs_ok_action[local.rs_alarm_option]}"]
 
   dimensions {
     DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
@@ -352,7 +361,7 @@ resource "aws_cloudwatch_metric_alarm" "rackspace_alarms" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "customer_alarms" {
-  count = "${local.notification_set * local.customer_alarm_count}"
+  count = "${local.customer_alarm_count}"
 
   alarm_name          = "${var.name}-${lookup(local.customer_alarms[count.index], "alarm_name")}"
   comparison_operator = "${lookup(local.customer_alarms[count.index], "operator")}"
@@ -363,7 +372,7 @@ resource "aws_cloudwatch_metric_alarm" "customer_alarms" {
   statistic           = "Average"
   threshold           = "${lookup(local.customer_alarms[count.index], "threshold")}"
   alarm_description   = "${lookup(local.customer_alarms[count.index], "description")}"
-  alarm_actions       = ["${local.customer_alarm_topic[local.notification_set]}"]
+  alarm_actions       = ["${local.alarm_sns_notification}"]
 
   dimensions {
     DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
@@ -375,7 +384,7 @@ resource "aws_db_event_subscription" "default" {
 
   name_prefix      = "${var.name}-"
   event_categories = "${var.event_categories}"
-  sns_topic        = "${element(local.customer_alarm_topic[local.notification_set], 0)}"
+  sns_topic        = "${element(local.alarm_sns_notification, 0)}"
   source_type      = "db-instance"
   source_ids       = ["${aws_db_instance.db_instance.id}"]
 }

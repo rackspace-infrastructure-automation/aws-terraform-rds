@@ -211,12 +211,6 @@ variable "alarm_write_iops_limit" {
   default     = 100
 }
 
-variable "customer_notifications_enabled" {
-  description = "Specifies whether customer notification alarms should be created."
-  type        = "string"
-  default     = false
-}
-
 variable "existing_monitoring_role" {
   description = "ARN of an existing enhanced monitoring role to use for this instance. (OPTIONAL)"
   type        = "string"
@@ -297,6 +291,12 @@ variable "internal_zone_name" {
 variable "license_model" {
   description = "License model information for this DB instance. Optional, but required for some DB engines, i.e. Oracle SE1"
   default     = ""
+}
+
+variable "rackspace_managed" {
+  description = "Boolean parameter controlling if instance will be fully managed by Rackspace support teams, created CloudWatch alarms that generate tickets, and utilize Rackspace managed SSM documents."
+  type        = "string"
+  default     = true
 }
 
 variable "read_replica" {

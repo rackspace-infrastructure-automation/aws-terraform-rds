@@ -41,7 +41,6 @@ Full working references are available at [examples](examples)
 | create_option_group | A boolean variable noting if a new option group should be created. | string | `true` | no |
 | create_parameter_group | A boolean variable noting if a new parameter group should be created. | string | `true` | no |
 | create_subnet_group | A boolean variable noting if a new DB subnet group should be created. | string | `true` | no |
-| customer_notifications_enabled | Specifies whether customer notification alarms should be created. | string | `false` | no |
 | db_snapshot_id | The name of a DB snapshot (optional). | string | `` | no |
 | dbname | The DB name to create. If omitted, no database is created initially | string | `` | no |
 | engine | Database Engine Type.  Allowed values: mariadb, mysql, oracle-ee, oracle-se, oracle-se1, oracle-se2, postgres, sqlserver-ee, sqlserver-ex, sqlserver-se, sqlserver-web | string | - | yes |
@@ -70,6 +69,7 @@ Full working references are available at [examples](examples)
 | port | The port on which the DB accepts connections | string | `` | no |
 | publicly_accessible | Boolean value that indicates whether the database instance is an Internet-facing instance. | string | `false` | no |
 | rackspace_alarms_enabled | Specifies whether non-emergency rackspace alarms will create a ticket. | string | `false` | no |
+| rackspace_managed | Boolean parameter controlling if instance will be fully managed by Rackspace support teams, created CloudWatch alarms that generate tickets, and utilize Rackspace managed SSM documents. | string | `true` | no |
 | read_replica | Specifies whether this RDS instance is a read replica. | string | `false` | no |
 | security_groups | A list of EC2 security groups to assign to this resource | list | - | yes |
 | skip_final_snapshot | Boolean value to control if the DB instance will take a final snapshot when destroyed.  This value should be set to false if a final snapshot is desired. | string | `false` | no |
