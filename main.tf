@@ -30,10 +30,10 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {
-  engine_class = "${element(split("-",var.engine), 0)}"
-  is_mssql     = "${local.engine_class == "sqlserver"}" # To allow setting MSSQL specific settings
-  is_oracle    = "${local.engine_class == "oracle"}"    # To allow setting Oracle specific settings
-  is_postgres  = "${local.engine_class == "postgres"}"  # To allow setting postgresql specific settings
+  engine_class  = "${element(split("-",var.engine), 0)}"
+  is_mssql      = "${local.engine_class == "sqlserver"}"                                         # To allow setting MSSQL specific settings
+  is_oracle     = "${local.engine_class == "oracle"}"                                            # To allow setting Oracle specific settings
+  is_postgres10 = "${local.engine_class == "postgres" && local.postgres_major_version == "10" }" # To allow setting postgresql specific settings
 
   # This map contains default values for several properties if they are explicitly defined.
   # Should be occasionally updated as newer engine versions are released
@@ -75,9 +75,11 @@ locals {
 
   port = "${coalesce(var.port, lookup(local.engine_defaults[local.engine_class], "port", "3306"))}"
 
-  storage_size   = "${coalesce(var.storage_size, lookup(local.engine_defaults[local.engine_class], "storage_size", 10))}"
-  engine_version = "${coalesce(var.engine_version, lookup(local.engine_defaults[local.engine_class], "version"))}"
-  license_model  = "${coalesce(var.license_model, lookup(local.engine_defaults[local.engine_class], "license", ""))}"
+  storage_size           = "${coalesce(var.storage_size, lookup(local.engine_defaults[local.engine_class], "storage_size", 10))}"
+  engine_version         = "${coalesce(var.engine_version, lookup(local.engine_defaults[local.engine_class], "version"))}"
+  postgres_major_version = "${element(split(".",local.engine_version), 0)}"
+
+  license_model = "${coalesce(var.license_model, lookup(local.engine_defaults[local.engine_class], "license", ""))}"
 
   tags {
     Name            = "${var.name}"
@@ -103,7 +105,7 @@ locals {
 
   # Break up the engine version in to chunks to get the major version part.  This is a single number for postgresql (ex: 10)
   # and two numbers for all other engines (ex: 5.7).
-  version_chunk = "${chunklist(split(".", local.engine_version), local.is_postgres ? 1 : 2)}"
+  version_chunk = "${chunklist(split(".", local.engine_version), local.is_postgres10 ? 1 : 2)}"
 
   major_version = "${join(".", local.version_chunk[0])}"
 
