@@ -103,7 +103,7 @@ locals {
 
   same_region_replica = "${var.read_replica && length(split(":", var.source_db)) == 1}"
 
-  # Break up the engine version in to chunks to get the major version part.  This is a single number for postgresql (ex: 10)
+  # Break up the engine version in to chunks to get the major version part.  This is a single number for PostgreSQL10
   # and two numbers for all other engines (ex: 5.7).
   version_chunk = "${chunklist(split(".", local.engine_version), local.is_postgres10 ? 1 : 2)}"
 
