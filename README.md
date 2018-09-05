@@ -100,7 +100,7 @@ Full working references are available at [examples](examples)
 
 ## Troubleshooting / FAQs
 
-- `module.rds.aws_db_option_group.db_option_group` cannot be deleted. When attempting to update an RDS instance requiring a rebuild, the creation of a new db_option_group may be required. If this occurs, the `terraform apply` will likely fail, as the option_group has dependencies (RDS final snapshot) and thus cannot be removed. In order to resolve this, apply the following steps:
+- `* aws_db_option_group.db_option_group: Error Deleting DB Option Group: OptionGroupNotFoundFault: Specified OptionGroupName: rds-2018081717273838300000000f not found.` When attempting to update an RDS instance requiring a rebuild, the creation of a new db_option_group may be required. If this occurs, the `terraform apply` will likely fail, as the option_group has dependencies (RDS final snapshot) and thus cannot be removed. In order to resolve this, apply the following steps:
   - Update RDS module with `create_option_group = "false"`
   - Run `terraform state list` and remove the option group (`terraform state rm module.rds.aws_db_option_group.db_option_group`)
   - Run `terraform apply`
