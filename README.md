@@ -98,3 +98,12 @@ Full working references are available at [examples](examples)
 | parameter_group | The Parameter Group used by the DB Instance |
 | subnet_group | The DB Subnet Group used by the DB Instance |
 
+## Troubleshooting / FAQs
+
+- `* aws_db_option_group.db_option_group: Error Deleting DB Option Group: OptionGroupNotFoundFault: Specified OptionGroupName: rds-2018081717273838300000000f not found.` When attempting to update an RDS instance requiring a rebuild, the creation of a new db_option_group may be required. If this occurs, the `terraform apply` will likely fail, as the option_group has dependencies (RDS final snapshot) and thus cannot be removed. In order to resolve this, apply the following steps:
+  - Update RDS module with `create_option_group = "false"`
+  - Run `terraform state list` and remove the option group (`terraform state rm module.rds.aws_db_option_group.db_option_group`)
+  - Run `terraform apply`
+  - Log into AWS Account and manually remove the option group. The dependent snapshot will also need to be removed
+  - Remove `create_option_group = "false"`, allowing for the option group to be created
+  - Run `terraform apply`
