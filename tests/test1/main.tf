@@ -20,6 +20,14 @@ resource "random_string" "password" {
   min_numeric = 1
 }
 
+resource "random_string" "mssql_name" {
+  length  = 15
+  special = false
+  number  = false
+  lower   = true
+  upper   = false
+}
+
 module "vpc" {
   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork//"
 
@@ -126,7 +134,7 @@ module "rds_mssql" {
 
   subnets             = "${module.vpc.private_subnets}"
   security_groups     = ["${module.vpc.default_sg}"]
-  name                = "test-mssql"
+  name                = "${random_string.mssql_name.result}"
   engine              = "sqlserver-se"
   instance_class      = "db.m4.large"
   password            = "${random_string.password.result}"
