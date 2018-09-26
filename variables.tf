@@ -60,6 +60,24 @@ variable "dbname" {
   default     = ""
 }
 
+variable "db_instance_create_timeout" {
+  description = "Timeout for creating instances, replicas, and restoring from Snapshots"
+  type        = "string"
+  default     = "60m"
+}
+
+variable "db_instance_update_timeout" {
+  description = "Timeout for datbabse modifications"
+  type        = "string"
+  default     = "80m"
+}
+
+variable "db_instance_delete_timeout" {
+  description = "Timeout for destroying databases. This includes the time required to take snapshots"
+  type        = "string"
+  default     = "60m"
+}
+
 variable "engine" {
   description = "Database Engine Type.  Allowed values: mariadb, mysql, oracle-ee, oracle-se, oracle-se1, oracle-se2, postgres, sqlserver-ee, sqlserver-ex, sqlserver-se, sqlserver-web"
   type        = "string"

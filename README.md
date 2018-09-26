@@ -41,6 +41,9 @@ Full working references are available at [examples](examples)
 | create_option_group | A boolean variable noting if a new option group should be created. | string | `true` | no |
 | create_parameter_group | A boolean variable noting if a new parameter group should be created. | string | `true` | no |
 | create_subnet_group | A boolean variable noting if a new DB subnet group should be created. | string | `true` | no |
+| db_instance_create_timeout | Timeout in minutes for creating instances, replicas, and restoring from Snapshots | string | - | yes |
+| db_instance_delete_timeout | Timeout in minutes for destroying databases. This includes the time required to take snapshots | string | - | yes |
+| db_instance_update_timeout | Timeout in minutes for datbabse modifications | string | - | yes |
 | db_snapshot_id | The name of a DB snapshot (optional). | string | `` | no |
 | dbname | The DB name to create. If omitted, no database is created initially | string | `` | no |
 | engine | Database Engine Type.  Allowed values: mariadb, mysql, oracle-ee, oracle-se, oracle-se1, oracle-se2, postgres, sqlserver-ee, sqlserver-ex, sqlserver-se, sqlserver-web | string | - | yes |
@@ -97,6 +100,7 @@ Full working references are available at [examples](examples)
 | option_group | The Option Group used by the DB Instance |
 | parameter_group | The Parameter Group used by the DB Instance |
 | subnet_group | The DB Subnet Group used by the DB Instance |
+
 
 ## Troubleshooting / FAQs
 
