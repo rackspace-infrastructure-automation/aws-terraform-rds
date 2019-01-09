@@ -270,11 +270,13 @@ variable "username" {
 variable "apply_immediately" {
   description = "Should database modifications be applied immediately?"
   default     = false
+  type        = "string"
 }
 
 variable "character_set_name" {
   description = "(Optional) The character set name to use for DB encoding in Oracle instances. This can't be changed. See Oracle Character Sets Supported in Amazon RDS for more information."
   default     = ""
+  type        = "string"
 }
 
 variable "environment" {
@@ -292,6 +294,7 @@ variable "event_categories" {
 variable "iam_authentication_enabled" {
   description = "Specifies whether or mappings of AWS Identity and Access Management (IAM) accounts to database accounts is enabled"
   default     = false
+  type        = "string"
 }
 
 variable "internal_record_name" {
@@ -309,6 +312,7 @@ variable "internal_zone_name" {
 variable "license_model" {
   description = "License model information for this DB instance. Optional, but required for some DB engines, i.e. Oracle SE1"
   default     = ""
+  type        = "string"
 }
 
 variable "rackspace_managed" {
@@ -320,6 +324,7 @@ variable "rackspace_managed" {
 variable "read_replica" {
   description = "Specifies whether this RDS instance is a read replica."
   default     = false
+  type        = "string"
 }
 
 variable "skip_final_snapshot" {
@@ -331,6 +336,7 @@ variable "skip_final_snapshot" {
 variable "source_db" {
   description = "The ID of the source DB instance.  For cross region replicas, the full ARN should be provided"
   default     = ""
+  type        = "string"
 }
 
 variable "tags" {
