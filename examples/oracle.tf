@@ -17,7 +17,7 @@ module "vpc" {
 }
 
 module "rds_oracle" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.5"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.6"
 
   ##################
   # Required Configuration
