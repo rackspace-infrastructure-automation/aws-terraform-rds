@@ -6,7 +6,7 @@ This module creates an RDS instance.  It currently supports master, replica, and
 
 ```
 module "rds" {
- source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.1"
+ source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.6"
 
  subnets           = "${module.vpc.private_subnets}" #  Required
  security_groups   = ["${module.vpc.default_sg}"]    #  Required

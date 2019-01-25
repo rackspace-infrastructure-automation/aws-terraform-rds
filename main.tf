@@ -7,7 +7,7 @@
  *
  *```
  *module "rds" {
- *  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.1"
+ *  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.6"
  *
  *  subnets           = "${module.vpc.private_subnets}" #  Required
  *  security_groups   = ["${module.vpc.default_sg}"]    #  Required
@@ -24,10 +24,6 @@
  *
  * - Terraform does not support joining a Microsoft SQL RDS instance to a Directory Service at this time.  This has been requested in https://github.com/terraform-providers/terraform-provider-aws/pull/5378 and can be added once that functionality is present.
  */
-
-data "aws_region" "current" {}
-
-data "aws_caller_identity" "current" {}
 
 locals {
   engine_class  = "${element(split("-",var.engine), 0)}"
@@ -115,88 +111,6 @@ locals {
   # MSSQL Family name only uses a single digit on the minor version number when setting the family (ex: sqlserver-se-14.0 , not sqlserver-se-14.00)
   major_version_substring = "${local.is_mssql ? substr(local.major_version, 0, length(local.major_version) - 1) : local.major_version}"
   family                  = "${coalesce(var.family, join(local.family_separator, list(var.engine, local.major_version_substring)))}"
-
-  # Only create 5th alarm for replica lag when the instance has a source DB
-  customer_alarm_count = "${var.read_replica ? 5 : 4}"
-
-  customer_alarms = [
-    {
-      alarm_name         = "free-storage-space"
-      evaluation_periods = 30
-      description        = "Free storage space has fallen below threshold, sending email notification."
-      operator           = "LessThanOrEqualToThreshold"
-      threshold          = 3072000000
-      metric             = "FreeStorageSpace"
-    },
-    {
-      alarm_name         = "write-iops-high"
-      evaluation_periods = 5
-      description        = "Alarm if WriteIOPs > ${var.alarm_write_iops_limit} for 5 minutes"
-      operator           = "GreaterThanThreshold"
-      threshold          = "${var.alarm_write_iops_limit}"
-      metric             = "WriteIOPS"
-    },
-    {
-      alarm_name         = "read-iops-high"
-      evaluation_periods = 5
-      description        = "Alarm if ReadIOPs > ${var.alarm_read_iops_limit} for 5 minutes"
-      operator           = "GreaterThanThreshold"
-      threshold          = "${var.alarm_read_iops_limit}"
-      metric             = "ReadIOPS"
-    },
-    {
-      alarm_name         = "cpu-high"
-      evaluation_periods = 15
-      description        = "Alarm if CPU > ${var.alarm_cpu_limit} for 15 minutes"
-      operator           = "GreaterThanThreshold"
-      threshold          = "${var.alarm_cpu_limit}"
-      metric             = "CPUUtilization"
-    },
-    {
-      alarm_name         = "replica-lag"
-      evaluation_periods = 3
-      description        = "ReplicaLag has exceeded threshold."
-      operator           = "GreaterThanOrEqualToThreshold"
-      threshold          = "3600"
-      metric             = "ReplicaLag"
-    },
-  ]
-
-  rs_alarm_topic         = ["arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rackspace-support-urgent"]
-  alarm_sns_notification = "${compact(list(var.notification_topic))}"
-  rs_alarm_option        = "${var.rackspace_managed ? "managed" : "unmanaged"}"
-
-  rs_alarm_action = {
-    managed   = "${local.rs_alarm_topic}"
-    unmanaged = "${local.alarm_sns_notification}"
-  }
-
-  rs_ok_action = {
-    managed   = "${local.rs_alarm_topic}"
-    unmanaged = []
-  }
-
-  # Only create replica lag alarm if we have a source DB and rackspace_alarms_enabled is true
-  rs_alarm_count = "${var.read_replica && var.rackspace_alarms_enabled ? 2 : 1}"
-
-  rs_alarms = [
-    {
-      alarm_name         = "free-storage-space"
-      evaluation_periods = 30
-      description        = "Free storage space has fallen below threshold, generating ticket."
-      operator           = "LessThanOrEqualToThreshold"
-      threshold          = "${var.alarm_free_space_limit}"
-      metric             = "FreeStorageSpace"
-    },
-    {
-      alarm_name         = "replica-lag"
-      evaluation_periods = 5
-      description        = "ReplicaLag has exceeded threshold, generating ticket.."
-      operator           = "GreaterThanOrEqualToThreshold"
-      threshold          = "3600"
-      metric             = "ReplicaLag"
-    },
-  ]
 }
 
 resource "aws_db_subnet_group" "db_subnet_group" {
@@ -348,43 +262,155 @@ resource "aws_db_instance" "db_instance" {
   ]
 }
 
-resource "aws_cloudwatch_metric_alarm" "rackspace_alarms" {
-  count = "${local.rs_alarm_count}"
+module "free_storage_space_alarm_ticket" {
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
 
-  alarm_name          = "${var.name}-${lookup(local.rs_alarms[count.index], "alarm_name")}-ticket"
-  comparison_operator = "${lookup(local.rs_alarms[count.index], "operator")}"
-  evaluation_periods  = "${lookup(local.rs_alarms[count.index], "evaluation_periods")}"
-  metric_name         = "${lookup(local.rs_alarms[count.index], "metric")}"
-  namespace           = "AWS/RDS"
-  period              = "60"
-  statistic           = "Average"
-  threshold           = "${lookup(local.rs_alarms[count.index], "threshold")}"
-  alarm_description   = "${lookup(local.rs_alarms[count.index], "description")}"
-  alarm_actions       = ["${local.rs_alarm_action[local.rs_alarm_option]}"]
-  ok_actions          = ["${local.rs_ok_action[local.rs_alarm_option]}"]
+  alarm_description        = "Free storage space has fallen below threshold, generating ticket."
+  alarm_name               = "${var.name}-free-storage-space-ticket"
+  comparison_operator      = "LessThanOrEqualToThreshold"
+  evaluation_periods       = 30
+  metric_name              = "FreeStorageSpace"
+  namespace                = "AWS/RDS"
+  notification_topic       = ["${var.notification_topic}"]
+  period                   = 60
+  rackspace_alarms_enabled = "${var.rackspace_alarms_enabled}"
+  rackspace_managed        = "${var.rackspace_managed}"
+  severity                 = "urgent"
+  statistic                = "Average"
+  threshold                = "${var.alarm_free_space_limit}"
 
-  dimensions {
+  dimensions = [{
     DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
-  }
+  }]
 }
 
-resource "aws_cloudwatch_metric_alarm" "customer_alarms" {
-  count = "${local.customer_alarm_count}"
+module "replica_lag_alarm_ticket" {
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
 
-  alarm_name          = "${var.name}-${lookup(local.customer_alarms[count.index], "alarm_name")}"
-  comparison_operator = "${lookup(local.customer_alarms[count.index], "operator")}"
-  evaluation_periods  = "${lookup(local.customer_alarms[count.index], "evaluation_periods")}"
-  metric_name         = "${lookup(local.customer_alarms[count.index], "metric")}"
-  namespace           = "AWS/RDS"
-  period              = "60"
-  statistic           = "Average"
-  threshold           = "${lookup(local.customer_alarms[count.index], "threshold")}"
-  alarm_description   = "${lookup(local.customer_alarms[count.index], "description")}"
-  alarm_actions       = ["${local.alarm_sns_notification}"]
+  alarm_count              = "${var.read_replica ? 1 : 0}"
+  alarm_description        = "ReplicaLag has exceeded threshold, generating ticket.."
+  alarm_name               = "${var.name}-replica-lag-ticket"
+  comparison_operator      = "GreaterThanOrEqualToThreshold"
+  evaluation_periods       = 5
+  metric_name              = "ReplicaLag"
+  namespace                = "AWS/RDS"
+  notification_topic       = ["${var.notification_topic}"]
+  period                   = 60
+  rackspace_alarms_enabled = "${var.rackspace_alarms_enabled}"
+  rackspace_managed        = "${var.rackspace_managed}"
+  severity                 = "urgent"
+  statistic                = "Average"
+  threshold                = 3600
 
-  dimensions {
+  dimensions = [{
     DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
-  }
+  }]
+}
+
+module "free_storage_space_alarm_email" {
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+
+  alarm_description        = "Free storage space has fallen below threshold, sending email notification."
+  alarm_name               = "${var.name}-free-storage-space-email"
+  comparison_operator      = "LessThanOrEqualToThreshold"
+  customer_alarms_enabled  = true
+  evaluation_periods       = 30
+  metric_name              = "FreeStorageSpace"
+  namespace                = "AWS/RDS"
+  notification_topic       = ["${var.notification_topic}"]
+  period                   = 60
+  rackspace_alarms_enabled = false
+  statistic                = "Average"
+  threshold                = 3072000000
+
+  dimensions = [{
+    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
+  }]
+}
+
+module "write_iops_high_alarm_email" {
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+
+  alarm_description        = "Alarm if WriteIOPs > ${var.alarm_write_iops_limit} for 5 minutes"
+  alarm_name               = "${var.name}-write-iops-high-email"
+  comparison_operator      = "GreaterThanThreshold"
+  customer_alarms_enabled  = true
+  evaluation_periods       = 5
+  metric_name              = "WriteIOPS"
+  namespace                = "AWS/RDS"
+  notification_topic       = ["${var.notification_topic}"]
+  period                   = 60
+  rackspace_alarms_enabled = false
+  statistic                = "Average"
+  threshold                = "${var.alarm_write_iops_limit}"
+
+  dimensions = [{
+    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
+  }]
+}
+
+module "read_iops_high_alarm_email" {
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+
+  alarm_description        = "Alarm if ReadIOPs > ${var.alarm_read_iops_limit} for 5 minutes"
+  alarm_name               = "${var.name}-read-iops-high-email"
+  comparison_operator      = "GreaterThanThreshold"
+  customer_alarms_enabled  = true
+  evaluation_periods       = 5
+  metric_name              = "ReadIOPS"
+  namespace                = "AWS/RDS"
+  notification_topic       = ["${var.notification_topic}"]
+  period                   = 60
+  rackspace_alarms_enabled = false
+  statistic                = "Average"
+  threshold                = "${var.alarm_read_iops_limit}"
+
+  dimensions = [{
+    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
+  }]
+}
+
+module "cpu_high_alarm_email" {
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+
+  alarm_description        = "Alarm if CPU > ${var.alarm_cpu_limit} for 15 minutes"
+  alarm_name               = "${var.name}-cpu-high-email"
+  comparison_operator      = "GreaterThanThreshold"
+  customer_alarms_enabled  = true
+  evaluation_periods       = 15
+  metric_name              = "CPUUtilization"
+  namespace                = "AWS/RDS"
+  notification_topic       = ["${var.notification_topic}"]
+  period                   = 60
+  rackspace_alarms_enabled = false
+  statistic                = "Average"
+  threshold                = "${var.alarm_cpu_limit}"
+
+  dimensions = [{
+    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
+  }]
+}
+
+module "replica_lag_alarm_email" {
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+
+  alarm_count              = "${var.read_replica ? 1 : 0}"
+  alarm_description        = "ReplicaLag has exceeded threshold."
+  alarm_name               = "${var.name}-replica-lag-email"
+  comparison_operator      = "GreaterThanOrEqualToThreshold"
+  customer_alarms_enabled  = true
+  evaluation_periods       = 3
+  metric_name              = "ReplicaLag"
+  namespace                = "AWS/RDS"
+  notification_topic       = ["${var.notification_topic}"]
+  period                   = 60
+  rackspace_alarms_enabled = false
+  statistic                = "Average"
+  threshold                = 3600
+
+  dimensions = [{
+    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
+  }]
 }
 
 resource "aws_db_event_subscription" "default" {
@@ -392,7 +418,7 @@ resource "aws_db_event_subscription" "default" {
 
   name_prefix      = "${var.name}-"
   event_categories = "${var.event_categories}"
-  sns_topic        = "${element(local.alarm_sns_notification, 0)}"
+  sns_topic        = "${var.notification_topic}"
   source_type      = "db-instance"
   source_ids       = ["${aws_db_instance.db_instance.id}"]
 }
