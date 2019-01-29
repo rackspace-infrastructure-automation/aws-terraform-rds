@@ -198,6 +198,16 @@ locals {
   monitoring_role_arn = "${coalesce(var.existing_monitoring_role, join("", aws_iam_role.enhanced_monitoring_role.*.arn))}"
 }
 
+resource "random_string" "unique" {
+  length  = 8
+  special = false
+  upper   = false
+
+  lifecycle {
+    ignore_changes = ["*"]
+  }
+}
+
 resource "aws_db_instance" "db_instance" {
   identifier_prefix = "${var.name}-"
 
@@ -235,7 +245,7 @@ resource "aws_db_instance" "db_instance" {
   maintenance_window          = "${var.maintenance_window}"
   skip_final_snapshot         = "${var.read_replica || var.skip_final_snapshot}"
   copy_tags_to_snapshot       = "${var.copy_tags_to_snapshot}"
-  final_snapshot_identifier   = "${var.name}-final-snapshot"
+  final_snapshot_identifier   = "${var.environment}-${var.name}-final-snapshot-${random_string.unique.result}"
   backup_retention_period     = "${var.read_replica ? 0 : var.backup_retention_period}"
   backup_window               = "${var.backup_window}"
   apply_immediately           = "${var.apply_immediately}"
