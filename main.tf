@@ -198,6 +198,8 @@ locals {
   monitoring_role_arn = "${coalesce(var.existing_monitoring_role, join("", aws_iam_role.enhanced_monitoring_role.*.arn))}"
 }
 
+# Generate a random 8 character lower case alphnumeric string to append to `final_snapshot_identifier`
+# We ideally want to avoid collisions which might encourage people to disable the final snapshot
 resource "random_string" "unique" {
   length  = 8
   special = false
