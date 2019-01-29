@@ -56,8 +56,9 @@ Full working references are available at [examples](examples)
 | family | Parameter Group Family Name (ex. mysql5.7,sqlserver-se-12.0,postgres9.5,oracle-se-12.1,mariadb10.1) | string | `""` | no |
 | iam\_authentication\_enabled | Specifies whether or mappings of AWS Identity and Access Management (IAM) accounts to database accounts is enabled | string | `"false"` | no |
 | instance\_class | The database instance type. | string | n/a | yes |
-| internal\_record\_name | Record Name for the new Resource Record in the Internal Hosted Zone. i.e. alb.aws.com | string | `""` | no |
-| internal\_zone\_name | TLD for Internal Hosted Zone. i.e. mycompany.local | string | `""` | no |
+| internal\_record\_name | Record Name for the new Resource Record in the Internal Hosted Zone | string | `""` | no |
+| internal\_zone\_id | The Route53 Internal Hosted Zone ID | string | `""` | no |
+| internal\_zone\_name | TLD for Internal Hosted Zone | string | `""` | no |
 | kms\_key\_id | KMS Key Arn to use for storage encryption. (OPTIONAL) | string | `""` | no |
 | license\_model | License model information for this DB instance. Optional, but required for some DB engines, i.e. Oracle SE1 | string | `""` | no |
 | maintenance\_window | The daily time range during which automated backups are created if automated backups are enabled. | string | `"Sun:07:00-Sun:08:00"` | no |
