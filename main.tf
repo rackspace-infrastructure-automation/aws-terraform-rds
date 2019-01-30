@@ -235,7 +235,7 @@ resource "aws_db_instance" "db_instance" {
   maintenance_window          = "${var.maintenance_window}"
   skip_final_snapshot         = "${var.read_replica || var.skip_final_snapshot}"
   copy_tags_to_snapshot       = "${var.copy_tags_to_snapshot}"
-  final_snapshot_identifier   = "${var.name}-final-snapshot"
+  final_snapshot_identifier   = "${var.name}-final-snapshot${var.final_snapshot_suffix == "" ? "" : "-${var.final_snapshot_suffix}"}"
   backup_retention_period     = "${var.read_replica ? 0 : var.backup_retention_period}"
   backup_window               = "${var.backup_window}"
   apply_immediately           = "${var.apply_immediately}"

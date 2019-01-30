@@ -54,6 +54,7 @@ Full working references are available at [examples](examples)
 | existing\_parameter\_group\_name | The existing parameter group to use for this instance. (OPTIONAL) | string | `""` | no |
 | existing\_subnet\_group | The existing DB subnet group to use for this instance (OPTIONAL) | string | `""` | no |
 | family | Parameter Group Family Name (ex. mysql5.7,sqlserver-se-12.0,postgres9.5,oracle-se-12.1,mariadb10.1) | string | `""` | no |
+| final\_snapshot\_suffix | string appended to the final snapshot name with a `-` delimiter | string | `""` | no |
 | iam\_authentication\_enabled | Specifies whether or mappings of AWS Identity and Access Management (IAM) accounts to database accounts is enabled | string | `"false"` | no |
 | instance\_class | The database instance type. | string | n/a | yes |
 | internal\_record\_name | Record Name for the new Resource Record in the Internal Hosted Zone | string | `""` | no |

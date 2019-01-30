@@ -333,6 +333,12 @@ variable "read_replica" {
   type        = "string"
 }
 
+variable "final_snapshot_suffix" {
+  description = "string appended to the final snapshot name with a `-` delimiter"
+  type        = "string"
+  default     = ""
+}
+
 variable "skip_final_snapshot" {
   description = "Boolean value to control if the DB instance will take a final snapshot when destroyed.  This value should be set to false if a final snapshot is desired."
   type        = "string"
