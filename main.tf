@@ -423,23 +423,12 @@ resource "aws_db_event_subscription" "default" {
   source_ids       = ["${aws_db_instance.db_instance.id}"]
 }
 
-data "aws_route53_zone" "hosted_zone" {
-  count = "${var.internal_record_name != "" ? 1 : 0}"
-
-  depends_on = ["aws_db_instance.db_instance"]
-
-  name         = "${var.internal_zone_name}"
-  private_zone = true
-}
-
 resource "aws_route53_record" "zone_record_alias" {
   count = "${var.internal_record_name != "" ? 1 : 0}"
 
-  depends_on = ["aws_db_instance.db_instance"]
-
-  name    = "${var.internal_record_name}.${data.aws_route53_zone.hosted_zone.name}"
+  name    = "${var.internal_record_name}.${var.internal_zone_name}"
   ttl     = "300"
   type    = "CNAME"
-  zone_id = "${data.aws_route53_zone.hosted_zone.zone_id}"
+  zone_id = "${var.internal_zone_id}"
   records = ["${aws_db_instance.db_instance.address}"]
 }
