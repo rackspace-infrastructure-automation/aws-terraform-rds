@@ -75,6 +75,7 @@ Full working references are available at [examples](examples)
 | rackspace\_managed | Boolean parameter controlling if instance will be fully managed by Rackspace support teams, created CloudWatch alarms that generate tickets, and utilize Rackspace managed SSM documents. | string | `"true"` | no |
 | read\_replica | Specifies whether this RDS instance is a read replica. | string | `"false"` | no |
 | security\_groups | A list of EC2 security groups to assign to this resource | list | n/a | yes |
+| final\_snapshot\_suffix | String to append to the final snapshot name with a `-` delimer if set | string | `""` | no |
 | skip\_final\_snapshot | Boolean value to control if the DB instance will take a final snapshot when destroyed.  This value should be set to false if a final snapshot is desired. | string | `"false"` | no |
 | source\_db | The ID of the source DB instance.  For cross region replicas, the full ARN should be provided | string | `""` | no |
 | storage\_encrypted | Specifies whether the DB instance is encrypted | string | `"false"` | no |
