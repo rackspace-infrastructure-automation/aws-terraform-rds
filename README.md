@@ -23,6 +23,7 @@ Full working references are available at [examples](examples)
 
 - Terraform does not support joining a Microsoft SQL RDS instance to a Directory Service at this time.  This has been requested in https://github.com/terraform-providers/terraform-provider-aws/pull/5378 and can be added once that functionality is present.
 
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -68,37 +69,36 @@ Full working references are available at [examples](examples)
 | notification\_topic | SNS Topic ARN to use for customer notifications from CloudWatch alarms. (OPTIONAL) | string | `""` | no |
 | options | List of custom options to apply to the option group. | list | `<list>` | no |
 | parameters | List of custom parameters to apply to the parameter group. | list | `<list>` | no |
-| password | Password for the local administrator account. | string | n/a | yes |
-| port | The port on which the DB accepts connections | string | `""` | no |
-| publicly\_accessible | Boolean value that indicates whether the database instance is an Internet-facing instance. | string | `"false"` | no |
-| rackspace\_alarms\_enabled | Specifies whether non-emergency rackspace alarms will create a ticket. | string | `"false"` | no |
-| rackspace\_managed | Boolean parameter controlling if instance will be fully managed by Rackspace support teams, created CloudWatch alarms that generate tickets, and utilize Rackspace managed SSM documents. | string | `"true"` | no |
-| read\_replica | Specifies whether this RDS instance is a read replica. | string | `"false"` | no |
-| security\_groups | A list of EC2 security groups to assign to this resource | list | n/a | yes |
-| final\_snapshot\_suffix | String to append to the final snapshot name with a `-` delimer if set | string | `""` | no |
-| skip\_final\_snapshot | Boolean value to control if the DB instance will take a final snapshot when destroyed.  This value should be set to false if a final snapshot is desired. | string | `"false"` | no |
-| source\_db | The ID of the source DB instance.  For cross region replicas, the full ARN should be provided | string | `""` | no |
-| storage\_encrypted | Specifies whether the DB instance is encrypted | string | `"false"` | no |
-| storage\_iops | The amount of provisioned IOPS. Setting this implies a storage_type of 'io1' | string | `"0"` | no |
-| storage\_size | Select RDS Volume Size in GB. | string | `""` | no |
-| storage\_type | Select RDS Volume Type. | string | `"gp2"` | no |
-| subnets | Subnets for RDS Instances | list | n/a | yes |
+| password | Password for the local administrator account. | string | - | yes |
+| port | The port on which the DB accepts connections | string | `` | no |
+| publicly_accessible | Boolean value that indicates whether the database instance is an Internet-facing instance. | string | `false` | no |
+| rackspace_alarms_enabled | Specifies whether non-emergency rackspace alarms will create a ticket. | string | `false` | no |
+| rackspace_managed | Boolean parameter controlling if instance will be fully managed by Rackspace support teams, created CloudWatch alarms that generate tickets, and utilize Rackspace managed SSM documents. | string | `true` | no |
+| read_replica | Specifies whether this RDS instance is a read replica. | string | `false` | no |
+| security_groups | A list of EC2 security groups to assign to this resource | list | - | yes |
+| skip_final_snapshot | Boolean value to control if the DB instance will take a final snapshot when destroyed.  This value should be set to false if a final snapshot is desired. | string | `false` | no |
+| source_db | The ID of the source DB instance.  For cross region replicas, the full ARN should be provided | string | `` | no |
+| storage_encrypted | Specifies whether the DB instance is encrypted | string | `false` | no |
+| storage_iops | The amount of provisioned IOPS. Setting this implies a storage_type of 'io1' | string | `0` | no |
+| storage_size | Select RDS Volume Size in GB. | string | `` | no |
+| storage_type | Select RDS Volume Type. | string | `gp2` | no |
+| subnets | Subnets for RDS Instances | list | - | yes |
 | tags | Custom tags to apply to all resources. | map | `<map>` | no |
-| timezone | The server time zone | string | `""` | no |
-| username | The name of master user for the client DB instance. | string | `"dbadmin"` | no |
+| timezone | The server time zone | string | `` | no |
+| username | The name of master user for the client DB instance. | string | `dbadmin` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| db\_endpoint | Database endpoint |
-| db\_endpoint\_address | Address of database endpoint |
-| db\_endpoint\_port | Port of database endpoint |
-| db\_instance | The DB instance identifier |
-| db\_instance\_arn | The DB instance ARN |
-| jdbc\_connection\_string | JDBC connection string for database |
-| monitoring\_role | The IAM role used for Enhanced Monitoring |
-| option\_group | The Option Group used by the DB Instance |
-| parameter\_group | The Parameter Group used by the DB Instance |
-| subnet\_group | The DB Subnet Group used by the DB Instance |
+| db_endpoint | Database endpoint |
+| db_endpoint_address | Address of database endpoint |
+| db_endpoint_port | Port of database endpoint |
+| db_instance | The DB instance identifier |
+| db_instance_arn | The DB instance ARN |
+| jdbc_connection_string | JDBC connection string for database |
+| monitoring_role | The IAM role used for Enhanced Monitoring |
+| option_group | The Option Group used by the DB Instance |
+| parameter_group | The Parameter Group used by the DB Instance |
+| subnet_group | The DB Subnet Group used by the DB Instance |
 
