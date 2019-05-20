@@ -78,6 +78,12 @@ variable "db_instance_delete_timeout" {
   default     = "60m"
 }
 
+variable "enable_deletion_protection" {
+  description = "If the DB instance should have deletion protection enabled. The database can't be deleted when this value is set to true. The default is false."
+  type        = "string"
+  default     = false
+}
+
 variable "engine" {
   description = "Database Engine Type.  Allowed values: mariadb, mysql, oracle-ee, oracle-se, oracle-se1, oracle-se2, postgres, sqlserver-ee, sqlserver-ex, sqlserver-se, sqlserver-web"
   type        = "string"

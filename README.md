@@ -45,6 +45,7 @@ Full working references are available at [examples](examples)
 | db\_instance\_update\_timeout | Timeout for datbabse modifications | string | `"80m"` | no |
 | db\_snapshot\_id | The name of a DB snapshot (optional). | string | `""` | no |
 | dbname | The DB name to create. If omitted, no database is created initially | string | `""` | no |
+| enable\_deletion\_protection | If the DB instance should have deletion protection enabled. The database can't be deleted when this value is set to true. The default is false. | string | `"false"` | no |
 | engine | Database Engine Type.  Allowed values: mariadb, mysql, oracle-ee, oracle-se, oracle-se1, oracle-se2, postgres, sqlserver-ee, sqlserver-ex, sqlserver-se, sqlserver-web | string | n/a | yes |
 | engine\_version | Database Engine Minor Version http://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html | string | `""` | no |
 | environment | Application environment for which this network is being created. one of: ('Development', 'Integration', 'PreProduction', 'Production', 'QA', 'Staging', 'Test') | string | `"Development"` | no |

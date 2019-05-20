@@ -206,6 +206,8 @@ resource "aws_db_instance" "db_instance" {
   instance_class = "${var.instance_class}"
   port           = "${local.port}"
 
+  deletion_protection = "${var.enable_deletion_protection}"
+
   allocated_storage = "${local.storage_size}"
   storage_type      = "${var.storage_type}"
   storage_encrypted = "${var.storage_encrypted}"
