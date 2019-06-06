@@ -11,7 +11,7 @@ data "aws_kms_secrets" "rds_credentials" {
 }
 
 module "vpc" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork//?ref=v0.0.6"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork//?ref=v0.0.9"
 
   vpc_name = "Test1VPC"
 }
@@ -86,7 +86,7 @@ module "rds_oracle" {
   # alarm_free_space_limit       = 1024000000
   # alarm_cpu_limit              = 60
   # monitoring_interval          = 0
-  # existing_monitoring_role_arn = ""
+  # existing_monitoring_role = ""
 
   ##################
   # Authentication information
