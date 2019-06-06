@@ -16,13 +16,13 @@ data "aws_kms_secrets" "rds_credentials" {
 }
 
 module "vpc" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork//?ref=v0.0.6"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork//?ref=v0.0.9"
 
   vpc_name = "Test1VPC"
 }
 
 module "vpc_dr" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork//?ref=v0.0.6"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork//?ref=v0.0.9"
 
   providers = {
     aws = "aws.oregon"
@@ -107,7 +107,7 @@ module "rds_master" {
   # alarm_free_space_limit       = 1024000000
   # alarm_cpu_limit              = 60
   # monitoring_interval          = 0
-  # existing_monitoring_role_arn = ""
+  # existing_monitoring_role = ""
 
   ##################
   # Other parameters
@@ -193,7 +193,7 @@ module "rds_replica" {
   # alarm_cpu_limit              = 60
   # rackspace_alarms_enabled      = true
   # monitoring_interval          = 0
-  # existing_monitoring_role_arn = ""
+  # existing_monitoring_role = ""
 
   ##################
   # Other parameters
@@ -294,7 +294,7 @@ module "rds_cross_region_replica" {
   # alarm_cpu_limit              = 60
   # rackspace_alarms_enabled      = true
   # monitoring_interval          = 0
-  # existing_monitoring_role_arn = ""
+  # existing_monitoring_role = ""
 
   ##################
   # Other parameters
