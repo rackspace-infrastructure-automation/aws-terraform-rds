@@ -32,11 +32,11 @@ module "vpc_dr" {
 }
 
 ####################################################################################################
-# Mariadb Master                                                                                   #
+# Postgres Master                                                                                   #
 ####################################################################################################
 
 module "rds_master" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.10"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.9"
 
   ##################
   # Required Configuration
@@ -121,11 +121,11 @@ module "rds_master" {
 }
 
 ####################################################################################################
-# Mariadb Same Region Replica                                                                     #
+# Postgres Same Region Replica                                                                     #
 ####################################################################################################
 
 module "rds_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.10"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.9"
 
   ##################
   # Required Configuration
@@ -207,7 +207,7 @@ module "rds_replica" {
 }
 
 ####################################################################################################
-# Mariadb Cross Region Replica                                                                     #
+# Postgres Cross Region Replica                                                                     #
 ####################################################################################################
 
 data "aws_kms_alias" "rds_crr" {
@@ -216,7 +216,7 @@ data "aws_kms_alias" "rds_crr" {
 }
 
 module "rds_cross_region_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.10"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.9"
 
   providers = {
     aws = "aws.oregon"
