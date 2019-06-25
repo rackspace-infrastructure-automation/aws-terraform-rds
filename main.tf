@@ -23,6 +23,15 @@
  * ## Limitations
  *
  * - Terraform does not support joining a Microsoft SQL RDS instance to a Directory Service at this time.  This has been requested in https://github.com/terraform-providers/terraform-provider-aws/pull/5378 and can be added once that functionality is present.
+ * ## Other TF Modules Used
+ * Using [aws-terraform-cloudwatch_alarm](https://github.com/rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm) to create the following CloudWatch Alarms:
+ * 	- free_storage_space_alarm_ticket
+ * 	- replica_lag_alarm_ticket
+ * 	- free_storage_space_alarm_email
+ * 	- write_iops_high_alarm_email
+ * 	- read_iops_high_alarm_email
+ * 	- cpu_high_alarm_email
+ * 	- replica_lag_alarm_email
  */
 
 locals {
