@@ -36,7 +36,7 @@ module "vpc_dr" {
 ####################################################################################################
 
 module "rds_master" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.9"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.11"
 
   ##################
   # Required Configuration
@@ -55,17 +55,21 @@ module "rds_master" {
   # VPC Configuration
   ##################
 
+
   # create_subnet_group   = true
   # existing_subnet_group = "some-subnet-group-name"
+
 
   ##################
   # Backups and Maintenance
   ##################
 
+
   # maintenance_window      = "Sun:07:00-Sun:08:00"
   # backup_retention_period = 35
   # backup_window           = "05:00-06:00"
   # db_snapshot_id          = "some-snapshot-id"
+
 
   ##################
   # Basic RDS
@@ -75,7 +79,8 @@ module "rds_master" {
   # engine_version        = "10.3"
   # port                  = "5432"
   # copy_tags_to_snapshot = true
-  # timezone              = "US/Central"
+  timezone = "US/Central"
+
   # storage_type          = "gp2"
   # storage_size          = 10
   # storage_iops          = 0
@@ -125,7 +130,7 @@ module "rds_master" {
 ####################################################################################################
 
 module "rds_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.9"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.11"
 
   ##################
   # Required Configuration
@@ -151,10 +156,12 @@ module "rds_replica" {
   # Backups and Maintenance
   ##################
 
+
   # maintenance_window      = "Sun:07:00-Sun:08:00"
   # backup_retention_period = 35
   # backup_window           = "05:00-06:00"
   # db_snapshot_id          = "some-snapshot-id"
+
 
   ##################
   # Basic RDS
@@ -164,7 +171,8 @@ module "rds_replica" {
   # engine_version        = "10.3"
   # port                  = "5432"
   # copy_tags_to_snapshot = true
-  # timezone              = "US/Central"
+  timezone = "US/Central"
+
   # storage_type          = "gp2"
   # storage_size          = 10
   # storage_iops          = 0
@@ -216,7 +224,7 @@ data "aws_kms_alias" "rds_crr" {
 }
 
 module "rds_cross_region_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.9"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.11"
 
   providers = {
     aws = "aws.oregon"
