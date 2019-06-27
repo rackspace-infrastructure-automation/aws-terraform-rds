@@ -38,6 +38,7 @@ locals {
   engine_class  = "${element(split("-",var.engine), 0)}"
   is_mssql      = "${local.engine_class == "sqlserver"}"                                         # To allow setting MSSQL specific settings
   is_oracle     = "${local.engine_class == "oracle"}"                                            # To allow setting Oracle specific settings
+  is_postgres   = "${local.engine_class == "postgres"}"
   is_postgres10 = "${local.engine_class == "postgres" && local.postgres_major_version == "10" }" # To allow setting postgresql specific settings
 
   # This map contains default values for several properties if they are explicitly defined.
@@ -99,7 +100,7 @@ locals {
     "none" = []
 
     "timezone" = [{
-      name  = "time_zone"
+      name  = "${local.is_postgres ? "timezone": "time_zone"}"
       value = "${var.timezone}"
     }]
   }
@@ -208,7 +209,7 @@ locals {
 }
 
 resource "aws_db_instance" "db_instance" {
-  identifier_prefix = "${var.name}-"
+  identifier_prefix = "${lower(var.name)}-"
 
   engine         = "${var.engine}"
   engine_version = "${local.engine_version}"
@@ -246,7 +247,7 @@ resource "aws_db_instance" "db_instance" {
   maintenance_window          = "${var.maintenance_window}"
   skip_final_snapshot         = "${var.read_replica || var.skip_final_snapshot}"
   copy_tags_to_snapshot       = "${var.copy_tags_to_snapshot}"
-  final_snapshot_identifier   = "${var.name}-final-snapshot${var.final_snapshot_suffix == "" ? "" : "-${var.final_snapshot_suffix}"}"
+  final_snapshot_identifier   = "${lower(var.name)}-final-snapshot${var.final_snapshot_suffix == "" ? "" : "-${lower(var.final_snapshot_suffix)}"}"
   backup_retention_period     = "${var.read_replica ? 0 : var.backup_retention_period}"
   backup_window               = "${var.backup_window}"
   apply_immediately           = "${var.apply_immediately}"
@@ -427,7 +428,7 @@ module "replica_lag_alarm_email" {
 resource "aws_db_event_subscription" "default" {
   count = "${length(var.event_categories) > 0 ? 1 : 0}"
 
-  name_prefix      = "${var.name}-"
+  name_prefix      = "${lower(var.name)}-"
   event_categories = "${var.event_categories}"
   sns_topic        = "${var.notification_topic}"
   source_type      = "db-instance"
