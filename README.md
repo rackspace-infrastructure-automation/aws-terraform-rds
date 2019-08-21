@@ -73,6 +73,7 @@ Using [aws-terraform-cloudwatch_alarm](https://github.com/rackspace-infrastructu
 | kms\_key\_id | KMS Key Arn to use for storage encryption. (OPTIONAL) | string | `""` | no |
 | license\_model | License model information for this DB instance. Optional, but required for some DB engines, i.e. Oracle SE1 | string | `""` | no |
 | maintenance\_window | The daily time range during which automated backups are created if automated backups are enabled. | string | `"Sun:07:00-Sun:08:00"` | no |
+| max\_storage\_size | Select Max RDS Volume Size in GB. Value other than 0 will enable storage autoscaling | string | `"0"` | no |
 | monitoring\_interval | The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. To disable collecting Enhanced Monitoring metrics, specify 0. The default is 0. Valid Values: 0, 1, 5, 10, 15, 30, 60. | string | `"0"` | no |
 | multi\_az | Create a multi-AZ RDS database instance | string | `"true"` | no |
 | name | The name prefix to use for the resources created in this module. | string | n/a | yes |

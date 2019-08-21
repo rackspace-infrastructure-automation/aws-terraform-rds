@@ -218,11 +218,12 @@ resource "aws_db_instance" "db_instance" {
 
   deletion_protection = "${var.enable_deletion_protection}"
 
-  allocated_storage = "${local.storage_size}"
-  storage_type      = "${var.storage_type}"
-  storage_encrypted = "${var.storage_encrypted}"
-  iops              = "${var.storage_iops}"
-  kms_key_id        = "${var.kms_key_id}"
+  allocated_storage     = "${local.storage_size}"
+  max_allocated_storage = "${var.max_storage_size}"
+  storage_type          = "${var.storage_type}"
+  storage_encrypted     = "${var.storage_encrypted}"
+  iops                  = "${var.storage_iops}"
+  kms_key_id            = "${var.kms_key_id}"
 
   name                                = "${var.dbname}"
   username                            = "${var.username}"

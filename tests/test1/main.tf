@@ -1,5 +1,5 @@
 provider "aws" {
-  version = "~> 1.2"
+  version = "~> 2.0"
   region  = "us-west-2"
 }
 
@@ -173,4 +173,6 @@ module "rds_postgres" {
   password            = "${random_string.password.result}"
   create_option_group = false
   skip_final_snapshot = true
+  storage_size        = 100
+  max_storage_size    = 200
 }
