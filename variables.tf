@@ -123,6 +123,12 @@ variable "storage_size" {
   default     = ""
 }
 
+variable "max_storage_size" {
+  description = "Select Max RDS Volume Size in GB. Value other than 0 will enable storage autoscaling"
+  type        = "string"
+  default     = "0"
+}
+
 variable "storage_type" {
   description = "Select RDS Volume Type."
   type        = "string"
