@@ -1,23 +1,23 @@
 /**
  * # aws-terraform-rds
  *
- *This module creates an RDS instance.  It currently supports master, replica, and cross region replica RDS instances.
+ * This module creates an RDS instance.  It currently supports master, replica, and cross region replica RDS instances.
  *
- *## Basic Usage
+ * ## Basic Usage
  *
- *```
- *module "rds" {
- *  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.6"
+ * ```HCL
+ * module "rds" {
+ *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.13"
  *
- *  subnets           = "${module.vpc.private_subnets}" #  Required
- *  security_groups   = ["${module.vpc.default_sg}"]    #  Required
- *  name              = "sample-mysql-rds"              #  Required
- *  engine            = "mysql"                         #  Required
- *  instance_class    = "db.t2.large"                   #  Required
- *  storage_encrypted = true                            #  Parameter defaults to false, but enabled for Cross Region Replication example
- *  password = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
- *}
- *```
+ *   subnets           = "${module.vpc.private_subnets}" #  Required
+ *   security_groups   = ["${module.vpc.default_sg}"]    #  Required
+ *   name              = "sample-mysql-rds"              #  Required
+ *   engine            = "mysql"                         #  Required
+ *   instance_class    = "db.t2.large"                   #  Required
+ *   storage_encrypted = true                            #  Parameter defaults to false, but enabled for Cross Region Replication example
+ *   password = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
+ * }
+ * ```
  *
  * Full working references are available at [examples](examples)
  * ## Limitations
@@ -40,6 +40,7 @@ locals {
   is_oracle     = "${local.engine_class == "oracle"}"                                            # To allow setting Oracle specific settings
   is_postgres   = "${local.engine_class == "postgres"}"
   is_postgres10 = "${local.engine_class == "postgres" && local.postgres_major_version == "10" }" # To allow setting postgresql specific settings
+  is_postgres11 = "${local.engine_class == "postgres" && local.postgres_major_version == "11" }" # To allow setting postgresql specific settings
 
   # This map contains default values for several properties if they are explicitly defined.
   # Should be occasionally updated as newer engine versions are released
@@ -62,7 +63,7 @@ locals {
 
     postgres = {
       port       = "5432"
-      version    = "10.3"
+      version    = "11.5"
       jdbc_proto = "postgresql"
     }
 
@@ -111,7 +112,7 @@ locals {
 
   # Break up the engine version in to chunks to get the major version part.  This is a single number for PostgreSQL10
   # and two numbers for all other engines (ex: 5.7).
-  version_chunk = "${chunklist(split(".", local.engine_version), local.is_postgres10 ? 1 : 2)}"
+  version_chunk = "${chunklist(split(".", local.engine_version), local.is_postgres10 || local.is_postgres11 ? 1 : 2)}"
 
   major_version = "${join(".", local.version_chunk[0])}"
 

@@ -174,7 +174,7 @@ variable "existing_parameter_group_name" {
 }
 
 variable "family" {
-  description = "Parameter Group Family Name (ex. mysql5.7,sqlserver-se-12.0,postgres9.5,oracle-se-12.1,mariadb10.1)"
+  description = "Parameter Group Family Name (ex. mysql5.7, sqlserver-se-12.0, postgres9.5, postgres10, postgres11, oracle-se-12.1, mariadb10.1)"
   type        = "string"
   default     = ""
 }
