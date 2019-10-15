@@ -11,13 +11,13 @@ data "aws_kms_secrets" "rds_credentials" {
 }
 
 module "vpc" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork//?ref=v0.0.9"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=v0.0.9"
 
   vpc_name = "Test1VPC"
 }
 
 module "rds_oracle" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.10"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.13"
 
   ##################
   # Required Configuration

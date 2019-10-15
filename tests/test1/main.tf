@@ -12,6 +12,14 @@ provider "random" {
   version = "~> 1.0"
 }
 
+resource "random_string" "identifier" {
+  length  = 6
+  special = false
+  lower   = true
+  upper   = false
+  number  = false
+}
+
 resource "random_string" "password" {
   length      = 16
   special     = false
@@ -31,7 +39,7 @@ resource "random_string" "mssql_name" {
 module "vpc" {
   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=master"
 
-  vpc_name = "Test1VPC"
+  vpc_name = "${random_string.identifier.result}VPC-1"
 }
 
 module "vpc_dr" {
@@ -41,20 +49,20 @@ module "vpc_dr" {
     aws = "aws.ohio"
   }
 
-  vpc_name = "Test2VPC"
+  vpc_name = "${random_string.identifier.result}VPC-2"
 }
 
 ########################
 #         MySQL        #
 ########################
-module "rds_mysql" {
+module "rds_mysql_latest" {
   source = "../../module"
 
   subnets             = "${module.vpc.private_subnets}"
   security_groups     = ["${module.vpc.default_sg}"]
-  name                = "test-mysql-rds"
+  name                = "mysql-${random_string.identifier.result}"
   engine              = "mysql"
-  instance_class      = "db.t2.large"
+  instance_class      = "db.t3.large"
   storage_encrypted   = true
   password            = "${random_string.password.result}"
   create_option_group = false
@@ -64,20 +72,20 @@ module "rds_mysql" {
 ########################
 #       Replica        #
 ########################
-module "rds_replica" {
+module "rds_replica_latest" {
   source = "../../module"
 
   subnets                = "${module.vpc.private_subnets}"
   security_groups        = ["${module.vpc.default_sg}"]
   create_subnet_group    = false
-  name                   = "test-mysql-rds-rr"
+  name                   = "mysql-${random_string.identifier.result}-rr"
   engine                 = "mysql"
-  instance_class         = "db.t2.large"
+  instance_class         = "db.t3.large"
   storage_encrypted      = true
   create_parameter_group = false
   create_option_group    = false
   read_replica           = true
-  source_db              = "${module.rds_mysql.db_instance}"
+  source_db              = "${module.rds_mysql_latest.db_instance}"
   password               = ""
 }
 
@@ -90,7 +98,7 @@ data "aws_kms_alias" "rds_crr" {
   name     = "alias/aws/rds"
 }
 
-module "rds_cross_region_replica" {
+module "rds_cross_region_replica_latest" {
   source = "../../module"
 
   providers = {
@@ -99,27 +107,27 @@ module "rds_cross_region_replica" {
 
   subnets           = "${module.vpc_dr.private_subnets}"
   security_groups   = ["${module.vpc_dr.default_sg}"]
-  name              = "test-mysql-rds-crr"
+  name              = "mysql-${random_string.identifier.result}-crr"
   engine            = "mysql"
-  instance_class    = "db.t2.large"
+  instance_class    = "db.t3.large"
   storage_encrypted = true
   kms_key_id        = "${data.aws_kms_alias.rds_crr.target_key_arn}"
   password          = ""
   read_replica      = true
-  source_db         = "${module.rds_mysql.db_instance_arn}"
+  source_db         = "${module.rds_mysql_latest.db_instance_arn}"
 }
 
 ########################
 #       MariaDB        #
 ########################
-module "rds_mariadb" {
+module "rds_mariadb_latest" {
   source = "../../module"
 
   subnets             = "${module.vpc.private_subnets}"
   security_groups     = ["${module.vpc.default_sg}"]
-  name                = "test-mariadb-rds"
+  name                = "mariadb-${random_string.identifier.result}"
   engine              = "mariadb"
-  instance_class      = "db.t2.large"
+  instance_class      = "db.t3.large"
   storage_encrypted   = true
   password            = "${random_string.password.result}"
   create_option_group = false
@@ -129,14 +137,14 @@ module "rds_mariadb" {
 ########################
 #        MS SQL        #
 ########################
-module "rds_mssql" {
+module "rds_mssql_latest" {
   source = "../../module"
 
   subnets             = "${module.vpc.private_subnets}"
   security_groups     = ["${module.vpc.default_sg}"]
-  name                = "${random_string.mssql_name.result}"
+  name                = "mssql-${random_string.identifier.result}"
   engine              = "sqlserver-se"
-  instance_class      = "db.m4.large"
+  instance_class      = "db.m5.large"
   password            = "${random_string.password.result}"
   create_option_group = false
   skip_final_snapshot = true
@@ -145,14 +153,14 @@ module "rds_mssql" {
 ########################
 #        Oracle        #
 ########################
-module "rds_oracle" {
+module "rds_oracle_latest" {
   source = "../../module"
 
   subnets             = "${module.vpc.private_subnets}"
   security_groups     = ["${module.vpc.default_sg}"]
-  name                = "test-oracle-rds"
+  name                = "oracle-${random_string.identifier.result}"
   engine              = "oracle-se2"
-  instance_class      = "db.t2.large"
+  instance_class      = "db.t3.large"
   password            = "${random_string.password.result}"
   create_option_group = false
   skip_final_snapshot = true
@@ -161,14 +169,14 @@ module "rds_oracle" {
 ########################
 #       Postgres       #
 ########################
-module "rds_postgres" {
+module "rds_postgres_latest" {
   source = "../../module"
 
   subnets             = "${module.vpc.private_subnets}"
   security_groups     = ["${module.vpc.default_sg}"]
-  name                = "test-postgres-rds"
+  name                = "postgres-${random_string.identifier.result}"
   engine              = "postgres"
-  instance_class      = "db.t2.large"
+  instance_class      = "db.t3.large"
   storage_encrypted   = true
   password            = "${random_string.password.result}"
   create_option_group = false

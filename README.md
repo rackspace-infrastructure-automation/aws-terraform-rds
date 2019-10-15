@@ -4,17 +4,17 @@ This module creates an RDS instance.  It currently supports master, replica, and
 
 ## Basic Usage
 
-```
+```HCL
 module "rds" {
- source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.6"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.13"
 
- subnets           = "${module.vpc.private_subnets}" #  Required
- security_groups   = ["${module.vpc.default_sg}"]    #  Required
- name              = "sample-mysql-rds"              #  Required
- engine            = "mysql"                         #  Required
- instance_class    = "db.t2.large"                   #  Required
- storage_encrypted = true                            #  Parameter defaults to false, but enabled for Cross Region Replication example
- password = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
+  subnets           = "${module.vpc.private_subnets}" #  Required
+  security_groups   = ["${module.vpc.default_sg}"]    #  Required
+  name              = "sample-mysql-rds"              #  Required
+  engine            = "mysql"                         #  Required
+  instance_class    = "db.t2.large"                   #  Required
+  storage_encrypted = true                            #  Parameter defaults to false, but enabled for Cross Region Replication example
+  password = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
 }
 ```
 
@@ -63,7 +63,7 @@ Using [aws-terraform-cloudwatch_alarm](https://github.com/rackspace-infrastructu
 | existing\_option\_group\_name | The existing option group to use for this instance. (OPTIONAL) | string | `""` | no |
 | existing\_parameter\_group\_name | The existing parameter group to use for this instance. (OPTIONAL) | string | `""` | no |
 | existing\_subnet\_group | The existing DB subnet group to use for this instance (OPTIONAL) | string | `""` | no |
-| family | Parameter Group Family Name (ex. mysql5.7,sqlserver-se-12.0,postgres9.5,oracle-se-12.1,mariadb10.1) | string | `""` | no |
+| family | Parameter Group Family Name (ex. mysql5.7, sqlserver-se-12.0, postgres9.5, postgres10, postgres11, oracle-se-12.1, mariadb10.1) | string | `""` | no |
 | final\_snapshot\_suffix | string appended to the final snapshot name with a `-` delimiter | string | `""` | no |
 | iam\_authentication\_enabled | Specifies whether or mappings of AWS Identity and Access Management (IAM) accounts to database accounts is enabled | string | `"false"` | no |
 | instance\_class | The database instance type. | string | n/a | yes |
