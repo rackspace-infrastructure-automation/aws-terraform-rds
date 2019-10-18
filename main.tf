@@ -1,23 +1,23 @@
 /**
  * # aws-terraform-rds
  *
- *This module creates an RDS instance.  It currently supports master, replica, and cross region replica RDS instances.
+ * This module creates an RDS instance.  It currently supports master, replica, and cross region replica RDS instances.
  *
- *## Basic Usage
+ * ## Basic Usage
  *
- *```
- *module "rds" {
- *  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.6"
+ * ```HCL
+ * module "rds" {
+ *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.13"
  *
- *  subnets           = "${module.vpc.private_subnets}" #  Required
- *  security_groups   = ["${module.vpc.default_sg}"]    #  Required
- *  name              = "sample-mysql-rds"              #  Required
- *  engine            = "mysql"                         #  Required
- *  instance_class    = "db.t2.large"                   #  Required
- *  storage_encrypted = true                            #  Parameter defaults to false, but enabled for Cross Region Replication example
- *  password = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
- *}
- *```
+ *   subnets           = "${module.vpc.private_subnets}" #  Required
+ *   security_groups   = ["${module.vpc.default_sg}"]    #  Required
+ *   name              = "sample-mysql-rds"              #  Required
+ *   engine            = "mysql"                         #  Required
+ *   instance_class    = "db.t2.large"                   #  Required
+ *   storage_encrypted = true                            #  Parameter defaults to false, but enabled for Cross Region Replication example
+ *   password = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
+ * }
+ * ```
  *
  * Full working references are available at [examples](examples)
  * ## Limitations
@@ -40,21 +40,23 @@ locals {
   is_oracle     = "${local.engine_class == "oracle"}"                                            # To allow setting Oracle specific settings
   is_postgres   = "${local.engine_class == "postgres"}"
   is_postgres10 = "${local.engine_class == "postgres" && local.postgres_major_version == "10" }" # To allow setting postgresql specific settings
+  is_postgres11 = "${local.engine_class == "postgres" && local.postgres_major_version == "11" }" # To allow setting postgresql specific settings
+  is_oracle18   = "${local.engine_class == "oracle" && local.oracle_major_version == "18" }"     # To allow setting Oracle specific settings
 
   # This map contains default values for several properties if they are explicitly defined.
   # Should be occasionally updated as newer engine versions are released
   engine_defaults = {
     mariadb = {
-      version = "10.2.12"
+      version = "10.3.13"
     }
 
     mysql = {
-      version = "5.7.21"
+      version = "5.7.26"
     }
 
     oracle = {
       port         = "1521"
-      version      = "12.1.0.2.v12"
+      version      = "18.0.0.0.ru-2019-07.rur-2019-07.r1"
       storage_size = "100"
       license      = "license-included"
       jdbc_proto   = "oracle:thin"
@@ -62,13 +64,13 @@ locals {
 
     postgres = {
       port       = "5432"
-      version    = "10.3"
+      version    = "11.5"
       jdbc_proto = "postgresql"
     }
 
     sqlserver = {
       port         = "1433"
-      version      = "14.00.3015.40.v1"
+      version      = "14.00.3049.1.v1"
       storage_size = "200"
       license      = "license-included"
       jdbc_proto   = "sqlserver"
@@ -84,6 +86,7 @@ locals {
   storage_size           = "${coalesce(var.storage_size, lookup(local.engine_defaults[local.engine_class], "storage_size", 10))}"
   engine_version         = "${coalesce(var.engine_version, lookup(local.engine_defaults[local.engine_class], "version"))}"
   postgres_major_version = "${element(split(".",local.engine_version), 0)}"
+  oracle_major_version   = "${element(split(".",local.engine_version), 0)}"
 
   license_model = "${coalesce(var.license_model, lookup(local.engine_defaults[local.engine_class], "license", ""))}"
 
@@ -109,9 +112,9 @@ locals {
 
   same_region_replica = "${var.read_replica && length(split(":", var.source_db)) == 1}"
 
-  # Break up the engine version in to chunks to get the major version part.  This is a single number for PostgreSQL10
+  # Break up the engine version in to chunks to get the major version part.  This is a single number for PostgreSQL10/11
   # and two numbers for all other engines (ex: 5.7).
-  version_chunk = "${chunklist(split(".", local.engine_version), local.is_postgres10 ? 1 : 2)}"
+  version_chunk = "${chunklist(split(".", local.engine_version), local.is_postgres10 || local.is_postgres11 || local.is_oracle18 ? 1 : 2)}"
 
   major_version = "${join(".", local.version_chunk[0])}"
 
@@ -276,7 +279,7 @@ resource "aws_db_instance" "db_instance" {
 }
 
 module "free_storage_space_alarm_ticket" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm?ref=v0.0.1"
 
   alarm_description        = "Free storage space has fallen below threshold, generating ticket."
   alarm_name               = "${var.name}-free-storage-space-ticket"
@@ -298,7 +301,7 @@ module "free_storage_space_alarm_ticket" {
 }
 
 module "replica_lag_alarm_ticket" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm?ref=v0.0.1"
 
   alarm_count              = "${var.read_replica ? 1 : 0}"
   alarm_description        = "ReplicaLag has exceeded threshold, generating ticket.."
@@ -321,7 +324,7 @@ module "replica_lag_alarm_ticket" {
 }
 
 module "free_storage_space_alarm_email" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm?ref=v0.0.1"
 
   alarm_description        = "Free storage space has fallen below threshold, sending email notification."
   alarm_name               = "${var.name}-free-storage-space-email"
@@ -342,7 +345,7 @@ module "free_storage_space_alarm_email" {
 }
 
 module "write_iops_high_alarm_email" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm?ref=v0.0.1"
 
   alarm_description        = "Alarm if WriteIOPs > ${var.alarm_write_iops_limit} for 5 minutes"
   alarm_name               = "${var.name}-write-iops-high-email"
@@ -363,7 +366,7 @@ module "write_iops_high_alarm_email" {
 }
 
 module "read_iops_high_alarm_email" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm?ref=v0.0.1"
 
   alarm_description        = "Alarm if ReadIOPs > ${var.alarm_read_iops_limit} for 5 minutes"
   alarm_name               = "${var.name}-read-iops-high-email"
@@ -384,7 +387,7 @@ module "read_iops_high_alarm_email" {
 }
 
 module "cpu_high_alarm_email" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm?ref=v0.0.1"
 
   alarm_description        = "Alarm if CPU > ${var.alarm_cpu_limit} for 15 minutes"
   alarm_name               = "${var.name}-cpu-high-email"
@@ -405,7 +408,7 @@ module "cpu_high_alarm_email" {
 }
 
 module "replica_lag_alarm_email" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=v0.0.1"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm?ref=v0.0.1"
 
   alarm_count              = "${var.read_replica ? 1 : 0}"
   alarm_description        = "ReplicaLag has exceeded threshold."

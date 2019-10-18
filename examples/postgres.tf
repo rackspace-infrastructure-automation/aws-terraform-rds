@@ -16,13 +16,13 @@ data "aws_kms_secrets" "rds_credentials" {
 }
 
 module "vpc" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork//?ref=v0.0.9"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=v0.0.9"
 
   vpc_name = "Test1VPC"
 }
 
 module "vpc_dr" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork//?ref=v0.0.9"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=v0.0.9"
 
   providers = {
     aws = "aws.oregon"
@@ -36,7 +36,7 @@ module "vpc_dr" {
 ####################################################################################################
 
 module "rds_master" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.11"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.13"
 
   ##################
   # Required Configuration
@@ -76,7 +76,7 @@ module "rds_master" {
   ##################
 
   # dbname                = "mydb"
-  # engine_version        = "10.3"
+  # engine_version        = "11.5"
   # port                  = "5432"
   # copy_tags_to_snapshot = true
   timezone = "US/Central"
@@ -91,7 +91,7 @@ module "rds_master" {
 
   # publicly_accessible           = false
   # auto_minor_version_upgrade    = true
-  # family                        = "postgres10.3"
+  # family                        = "postgres11"
   # multi_az                      = false
   # storage_encrypted             = false
   # kms_key_id                    = "some-kms-key-id"
@@ -130,7 +130,7 @@ module "rds_master" {
 ####################################################################################################
 
 module "rds_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.11"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.13"
 
   ##################
   # Required Configuration
@@ -168,7 +168,7 @@ module "rds_replica" {
   ##################
 
   # dbname                = "mydb"
-  # engine_version        = "10.3"
+  # engine_version        = "11.5"
   # port                  = "5432"
   # copy_tags_to_snapshot = true
   timezone = "US/Central"
@@ -183,7 +183,7 @@ module "rds_replica" {
 
   # publicly_accessible           = false
   # auto_minor_version_upgrade    = true
-  # family                        = "postgres10.3"
+  # family                        = "postgres11"
   # multi_az                      = false
   # storage_encrypted             = false
   # kms_key_id                    = "some-kms-key-id"
@@ -215,7 +215,7 @@ module "rds_replica" {
 }
 
 ####################################################################################################
-# Postgres Cross Region Replica                                                                     #
+# Postgres Cross Region Replica                                                                    #
 ####################################################################################################
 
 data "aws_kms_alias" "rds_crr" {
@@ -224,7 +224,7 @@ data "aws_kms_alias" "rds_crr" {
 }
 
 module "rds_cross_region_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds//?ref=v0.0.11"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.13"
 
   providers = {
     aws = "aws.oregon"
@@ -266,7 +266,7 @@ module "rds_cross_region_replica" {
   ##################
 
   # dbname                = "mydb"
-  # engine_version        = "10.3"
+  # engine_version        = "11.5"
   # port                  = "5432"
   # copy_tags_to_snapshot = true
   # timezone              = "US/Central"
@@ -280,7 +280,7 @@ module "rds_cross_region_replica" {
 
   # publicly_accessible           = false
   # auto_minor_version_upgrade    = true
-  # family                        = "postgres10.3"
+  # family                        = "postgres11"
   # multi_az                      = false
   # storage_encrypted             = false
   # kms_key_id                    = "some-kms-key-id"
