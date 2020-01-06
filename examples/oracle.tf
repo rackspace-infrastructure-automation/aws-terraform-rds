@@ -15,24 +15,25 @@ data "aws_kms_secrets" "rds_credentials" {
 }
 
 module "vpc" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=v0.0.9"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=v0.12.0"
 
-  vpc_name = "Test1VPC"
+  name = "Test1VPC"
 }
 
 module "rds_oracle" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.13"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.0"
 
   ##################
   # Required Configuration
   ##################
 
-  subnets         = module.vpc.private_subnets
-  security_groups = [module.vpc.default_sg]                                    #  Required
-  name            = "sample-oracle-rds"                                        #  Required
   engine          = "oracle-se2"                                               #  Required
   instance_class  = "db.t2.large"                                              #  Required
+  name            = "sample-oracle-rds"                                        #  Required
   password        = data.aws_kms_secrets.rds_credentials.plaintext["password"] #  Required
+  security_groups = [module.vpc.default_sg]                                    #  Required
+  subnets         = module.vpc.private_subnets
+
   ##################
   # VPC Configuration
   ##################
@@ -44,52 +45,52 @@ module "rds_oracle" {
   # Backups and Maintenance
   ##################
 
-  # maintenance_window      = "Sun:07:00-Sun:08:00"
   # backup_retention_period = 35
   # backup_window           = "05:00-06:00"
   # db_snapshot_id          = "some-snapshot-id"
+  # maintenance_window      = "Sun:07:00-Sun:08:00"
 
   ##################
   # Basic RDS
   ##################
 
+  # copy_tags_to_snapshot = true
   # dbname                = "mydb"
   # engine_version        = "12.1.0.2.v12"
   # port                  = "1521"
-  # copy_tags_to_snapshot = true
-  # timezone              = "US/Central"
-  # storage_type          = "gp2"
-  # storage_size          = 100
   # storage_iops          = 0
+  # storage_size          = 100
+  # storage_type          = "gp2"
+  # timezone              = "US/Central"
 
   ##################
   # RDS Advanced
   ##################
 
-  # publicly_accessible           = false
   # auto_minor_version_upgrade    = true
-  # family                        = "oracle-se2-12.1"
-  # multi_az                      = false
-  # storage_encrypted             = false
-  # kms_key_id                    = "some-kms-key-id"
-  # parameters                    = []
-  # create_parameter_group        = true
-  # existing_parameter_group_name = "some-parameter-group-name"
-  # options                       = []
   # create_option_group           = true
+  # create_parameter_group        = true
   # existing_option_group_name    = "some-option-group-name"
+  # existing_parameter_group_name = "some-parameter-group-name"
+  # family                        = "oracle-se2-12.1"
+  # kms_key_id                    = "some-kms-key-id"
+  # multi_az                      = false
+  # options                       = []
+  # parameters                    = []
+  # publicly_accessible           = false
+  # storage_encrypted             = false
 
   ##################
   # RDS Monitoring
   ##################
 
-  # notification_topic           = "arn:aws:sns:<region>:<account>:some-topic"
-  # alarm_write_iops_limit       = 100
-  # alarm_read_iops_limit        = 100
-  # alarm_free_space_limit       = 1024000000
-  # alarm_cpu_limit              = 60
-  # monitoring_interval          = 0
+  # alarm_cpu_limit          = 60
+  # alarm_free_space_limit   = 1024000000
+  # alarm_read_iops_limit    = 100
+  # alarm_write_iops_limit   = 100
   # existing_monitoring_role = ""
+  # monitoring_interval      = 0
+  # notification_topic       = "arn:aws:sns:<region>:<account>:some-topic"
 
   ##################
   # Authentication information
