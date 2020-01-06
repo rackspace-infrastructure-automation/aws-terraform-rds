@@ -1,5 +1,9 @@
+terraform {
+  required_version = ">= 0.12"
+}
+
 provider "aws" {
-  version = "~> 1.2"
+  version = "~> 2.2"
   region  = "us-east-1"
 }
 
@@ -23,13 +27,12 @@ module "rds_oracle" {
   # Required Configuration
   ##################
 
-  subnets         = "${module.vpc.private_subnets}"
-  security_groups = ["${module.vpc.default_sg}"]                                    #  Required
-  name            = "sample-oracle-rds"                                             #  Required
-  engine          = "oracle-se2"                                                    #  Required
-  instance_class  = "db.t2.large"                                                   #  Required
-  password        = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
-
+  subnets         = module.vpc.private_subnets
+  security_groups = [module.vpc.default_sg]                                    #  Required
+  name            = "sample-oracle-rds"                                        #  Required
+  engine          = "oracle-se2"                                               #  Required
+  instance_class  = "db.t2.large"                                              #  Required
+  password        = data.aws_kms_secrets.rds_credentials.plaintext["password"] #  Required
   ##################
   # VPC Configuration
   ##################

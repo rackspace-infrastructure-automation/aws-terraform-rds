@@ -1,5 +1,9 @@
+terraform {
+  required_version = ">= 0.12"
+}
+
 provider "aws" {
-  version = "~> 2.0"
+  version = "~> 2.2"
   region  = "us-west-2"
 }
 
@@ -9,7 +13,7 @@ provider "aws" {
 }
 
 provider "random" {
-  version = "~> 1.0"
+  version = "~> 2.0"
 }
 
 resource "random_string" "identifier" {
@@ -46,7 +50,7 @@ module "vpc_dr" {
   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=master"
 
   providers = {
-    aws = "aws.ohio"
+    aws = aws.ohio
   }
 
   vpc_name = "${random_string.identifier.result}VPC-2"
@@ -58,13 +62,13 @@ module "vpc_dr" {
 module "rds_mysql_latest" {
   source = "../../module"
 
-  subnets             = "${module.vpc.private_subnets}"
-  security_groups     = ["${module.vpc.default_sg}"]
+  subnets             = module.vpc.private_subnets
+  security_groups     = [module.vpc.default_sg]
   name                = "mysql-${random_string.identifier.result}"
   engine              = "mysql"
   instance_class      = "db.t3.large"
   storage_encrypted   = true
-  password            = "${random_string.password.result}"
+  password            = random_string.password.result
   create_option_group = false
   skip_final_snapshot = true
 }
@@ -75,8 +79,8 @@ module "rds_mysql_latest" {
 module "rds_replica_latest" {
   source = "../../module"
 
-  subnets                = "${module.vpc.private_subnets}"
-  security_groups        = ["${module.vpc.default_sg}"]
+  subnets                = module.vpc.private_subnets
+  security_groups        = [module.vpc.default_sg]
   create_subnet_group    = false
   name                   = "mysql-${random_string.identifier.result}-rr"
   engine                 = "mysql"
@@ -85,7 +89,7 @@ module "rds_replica_latest" {
   create_parameter_group = false
   create_option_group    = false
   read_replica           = true
-  source_db              = "${module.rds_mysql_latest.db_instance}"
+  source_db              = module.rds_mysql_latest.db_instance
   password               = ""
 }
 
@@ -94,7 +98,7 @@ module "rds_replica_latest" {
 ########################
 
 data "aws_kms_alias" "rds_crr" {
-  provider = "aws.ohio"
+  provider = aws.ohio
   name     = "alias/aws/rds"
 }
 
@@ -102,19 +106,19 @@ module "rds_cross_region_replica_latest" {
   source = "../../module"
 
   providers = {
-    aws = "aws.ohio"
+    aws = aws.ohio
   }
 
-  subnets           = "${module.vpc_dr.private_subnets}"
-  security_groups   = ["${module.vpc_dr.default_sg}"]
+  subnets           = module.vpc_dr.private_subnets
+  security_groups   = [module.vpc_dr.default_sg]
   name              = "mysql-${random_string.identifier.result}-crr"
   engine            = "mysql"
   instance_class    = "db.t3.large"
   storage_encrypted = true
-  kms_key_id        = "${data.aws_kms_alias.rds_crr.target_key_arn}"
+  kms_key_id        = data.aws_kms_alias.rds_crr.target_key_arn
   password          = ""
   read_replica      = true
-  source_db         = "${module.rds_mysql_latest.db_instance_arn}"
+  source_db         = module.rds_mysql_latest.db_instance_arn
 }
 
 ########################
@@ -123,13 +127,13 @@ module "rds_cross_region_replica_latest" {
 module "rds_mariadb_latest" {
   source = "../../module"
 
-  subnets             = "${module.vpc.private_subnets}"
-  security_groups     = ["${module.vpc.default_sg}"]
+  subnets             = module.vpc.private_subnets
+  security_groups     = [module.vpc.default_sg]
   name                = "mariadb-${random_string.identifier.result}"
   engine              = "mariadb"
   instance_class      = "db.t3.large"
   storage_encrypted   = true
-  password            = "${random_string.password.result}"
+  password            = random_string.password.result
   create_option_group = false
   skip_final_snapshot = true
 }
@@ -140,12 +144,12 @@ module "rds_mariadb_latest" {
 module "rds_mssql_latest" {
   source = "../../module"
 
-  subnets             = "${module.vpc.private_subnets}"
-  security_groups     = ["${module.vpc.default_sg}"]
+  subnets             = module.vpc.private_subnets
+  security_groups     = [module.vpc.default_sg]
   name                = "mssql-${random_string.identifier.result}"
   engine              = "sqlserver-se"
   instance_class      = "db.m5.large"
-  password            = "${random_string.password.result}"
+  password            = random_string.password.result
   create_option_group = false
   skip_final_snapshot = true
 }
@@ -156,12 +160,12 @@ module "rds_mssql_latest" {
 module "rds_oracle_latest" {
   source = "../../module"
 
-  subnets             = "${module.vpc.private_subnets}"
-  security_groups     = ["${module.vpc.default_sg}"]
+  subnets             = module.vpc.private_subnets
+  security_groups     = [module.vpc.default_sg]
   name                = "oracle-${random_string.identifier.result}"
   engine              = "oracle-se2"
   instance_class      = "db.t3.large"
-  password            = "${random_string.password.result}"
+  password            = random_string.password.result
   create_option_group = false
   skip_final_snapshot = true
 }
@@ -172,13 +176,13 @@ module "rds_oracle_latest" {
 module "rds_postgres_latest" {
   source = "../../module"
 
-  subnets             = "${module.vpc.private_subnets}"
-  security_groups     = ["${module.vpc.default_sg}"]
+  subnets             = module.vpc.private_subnets
+  security_groups     = [module.vpc.default_sg]
   name                = "postgres-${random_string.identifier.result}"
   engine              = "postgres"
   instance_class      = "db.t3.large"
   storage_encrypted   = true
-  password            = "${random_string.password.result}"
+  password            = random_string.password.result
   create_option_group = false
   skip_final_snapshot = true
   storage_size        = 100

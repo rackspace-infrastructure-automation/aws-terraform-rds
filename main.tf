@@ -34,14 +34,18 @@
  * 	- replica_lag_alarm_email
  */
 
+terraform {
+  required_version = ">= 0.12"
+}
+
 locals {
-  engine_class  = "${element(split("-",var.engine), 0)}"
-  is_mssql      = "${local.engine_class == "sqlserver"}"                                         # To allow setting MSSQL specific settings
-  is_oracle     = "${local.engine_class == "oracle"}"                                            # To allow setting Oracle specific settings
-  is_postgres   = "${local.engine_class == "postgres"}"
-  is_postgres10 = "${local.engine_class == "postgres" && local.postgres_major_version == "10" }" # To allow setting postgresql specific settings
-  is_postgres11 = "${local.engine_class == "postgres" && local.postgres_major_version == "11" }" # To allow setting postgresql specific settings
-  is_oracle18   = "${local.engine_class == "oracle" && local.oracle_major_version == "18" }"     # To allow setting Oracle specific settings
+  engine_class  = element(split("-", var.engine), 0)
+  is_mssql      = local.engine_class == "sqlserver" # To allow setting MSSQL specific settings
+  is_oracle     = local.engine_class == "oracle"    # To allow setting Oracle specific settings
+  is_postgres   = local.engine_class == "postgres"
+  is_postgres10 = local.engine_class == "postgres" && local.postgres_major_version == "10" # To allow setting postgresql specific settings
+  is_postgres11 = local.engine_class == "postgres" && local.postgres_major_version == "11" # To allow setting postgresql specific settings
+  is_oracle18   = local.engine_class == "oracle" && local.oracle_major_version == "18"     # To allow setting Oracle specific settings
 
   # This map contains default values for several properties if they are explicitly defined.
   # Should be occasionally updated as newer engine versions are released
@@ -49,11 +53,9 @@ locals {
     mariadb = {
       version = "10.3.13"
     }
-
     mysql = {
       version = "5.7.26"
     }
-
     oracle = {
       port         = "1521"
       version      = "18.0.0.0.ru-2019-07.rur-2019-07.r1"
@@ -61,13 +63,11 @@ locals {
       license      = "license-included"
       jdbc_proto   = "oracle:thin"
     }
-
     postgres = {
       port       = "5432"
       version    = "11.5"
       jdbc_proto = "postgresql"
     }
-
     sqlserver = {
       port         = "1433"
       version      = "14.00.3049.1.v1"
@@ -79,61 +79,91 @@ locals {
 
   # This section grabs the explicitly provided variable, then the default for the engine from the above
   # map, and finally a module default where appropriate.
-  jdbc_proto = "${lookup(local.engine_defaults[local.engine_class], "jdbc_proto", "mysql")}"
+  jdbc_proto = lookup(
+    local.engine_defaults[local.engine_class],
+    "jdbc_proto",
+    "mysql",
+  )
 
-  port = "${coalesce(var.port, lookup(local.engine_defaults[local.engine_class], "port", "3306"))}"
+  port = coalesce(
+    var.port,
+    lookup(local.engine_defaults[local.engine_class], "port", "3306"),
+  )
 
-  storage_size           = "${coalesce(var.storage_size, lookup(local.engine_defaults[local.engine_class], "storage_size", 10))}"
-  engine_version         = "${coalesce(var.engine_version, lookup(local.engine_defaults[local.engine_class], "version"))}"
-  postgres_major_version = "${element(split(".",local.engine_version), 0)}"
-  oracle_major_version   = "${element(split(".",local.engine_version), 0)}"
+  storage_size = coalesce(
+    var.storage_size,
+    lookup(
+      local.engine_defaults[local.engine_class],
+      "storage_size",
+      10,
+    ),
+  )
+  engine_version = coalesce(
+    var.engine_version,
+    local.engine_defaults[local.engine_class]["version"],
+  )
+  postgres_major_version = element(split(".", local.engine_version), 0)
+  oracle_major_version   = element(split(".", local.engine_version), 0)
 
-  license_model = "${coalesce(var.license_model, lookup(local.engine_defaults[local.engine_class], "license", ""))}"
+  license_model = coalesce(
+    var.license_model,
+    lookup(local.engine_defaults[local.engine_class], "license", ""),
+  )
 
-  tags {
-    Name            = "${var.name}"
+  tags = {
+    Name            = var.name
     ServiceProvider = "Rackspace"
-    Environment     = "${var.environment}"
+    Environment     = var.environment
   }
 
   # If we are not setting a timezone, or we are using MSSQL, we will use "none" for the parameter list.
-  parameter_lookup = "${var.timezone == "" || local.is_mssql ? "none":"timezone"}"
+  parameter_lookup = var.timezone == "" || local.is_mssql ? "none" : "timezone"
 
-  parameters {
+  parameters = {
     "none" = []
-
-    "timezone" = [{
-      name  = "${local.is_postgres ? "timezone": "time_zone"}"
-      value = "${var.timezone}"
-    }]
+    "timezone" = [
+      {
+        name  = local.is_postgres ? "timezone" : "time_zone"
+        value = var.timezone
+      },
+    ]
   }
 
   options = []
 
-  same_region_replica = "${var.read_replica && length(split(":", var.source_db)) == 1}"
+  same_region_replica = var.read_replica && length(split(":", var.source_db)) == 1
 
   # Break up the engine version in to chunks to get the major version part.  This is a single number for PostgreSQL10/11
   # and two numbers for all other engines (ex: 5.7).
-  version_chunk = "${chunklist(split(".", local.engine_version), local.is_postgres10 || local.is_postgres11 || local.is_oracle18 ? 1 : 2)}"
+  version_chunk = chunklist(
+    split(".", local.engine_version),
+    local.is_postgres10 || local.is_postgres11 || local.is_oracle18 ? 1 : 2,
+  )
 
-  major_version = "${join(".", local.version_chunk[0])}"
+  major_version = join(".", local.version_chunk[0])
 
   # We will use a '-' to join engine and major version for Oracle and MSSQL, and an empty string for other engines.
-  family_separator = "${local.is_mssql || local.is_oracle ? "-" : ""}"
+  family_separator = local.is_mssql || local.is_oracle ? "-" : ""
 
   # MSSQL Family name only uses a single digit on the minor version number when setting the family (ex: sqlserver-se-14.0 , not sqlserver-se-14.00)
-  major_version_substring = "${local.is_mssql ? substr(local.major_version, 0, length(local.major_version) - 1) : local.major_version}"
-  family                  = "${coalesce(var.family, join(local.family_separator, list(var.engine, local.major_version_substring)))}"
+  major_version_substring = local.is_mssql ? substr(local.major_version, 0, length(local.major_version) - 1) : local.major_version
+  family = coalesce(
+    var.family,
+    join(
+      local.family_separator,
+      [var.engine, local.major_version_substring],
+    ),
+  )
 }
 
 resource "aws_db_subnet_group" "db_subnet_group" {
-  count = "${var.create_subnet_group ? 1 : 0}"
+  count = var.create_subnet_group ? 1 : 0
 
   name_prefix = "${var.name}-"
   description = "Database subnet group for ${var.name}"
-  subnet_ids  = ["${var.subnets}"]
+  subnet_ids  = var.subnets
 
-  tags = "${merge(var.tags, local.tags)}"
+  tags = merge(var.tags, local.tags)
 
   lifecycle {
     create_before_destroy = true
@@ -141,15 +171,22 @@ resource "aws_db_subnet_group" "db_subnet_group" {
 }
 
 resource "aws_db_parameter_group" "db_parameter_group" {
-  count = "${var.create_parameter_group ? 1 : 0}"
+  count = var.create_parameter_group ? 1 : 0
 
   name_prefix = "${var.name}-"
   description = "Database parameter group for ${var.name}"
-  family      = "${local.family}"
+  family      = local.family
 
-  parameter = "${concat(var.parameters, local.parameters[local.parameter_lookup])}"
+  dynamic "parameter" {
+    for_each = concat(var.parameters, local.parameters[local.parameter_lookup])
+    content {
+      apply_method = lookup(parameter.value, "apply_method", null)
+      name         = parameter.value.name
+      value        = parameter.value.value
+    }
+  }
 
-  tags = "${merge(var.tags, local.tags)}"
+  tags = merge(var.tags, local.tags)
 
   lifecycle {
     create_before_destroy = true
@@ -157,16 +194,33 @@ resource "aws_db_parameter_group" "db_parameter_group" {
 }
 
 resource "aws_db_option_group" "db_option_group" {
-  count = "${var.create_option_group ? 1 : 0}"
+  count = var.create_option_group ? 1 : 0
 
   name_prefix              = "${var.name}-"
   option_group_description = "Option group for ${var.name}"
-  engine_name              = "${var.engine}"
-  major_engine_version     = "${local.major_version}"
+  engine_name              = var.engine
+  major_engine_version     = local.major_version
 
-  option = "${concat(var.options, local.options)}"
+  dynamic "option" {
+    for_each = concat(var.options, local.options)
+    content {
+      db_security_group_memberships  = lookup(option.value, "db_security_group_memberships", null)
+      option_name                    = option.value.option_name
+      port                           = lookup(option.value, "port", null)
+      version                        = lookup(option.value, "version", null)
+      vpc_security_group_memberships = lookup(option.value, "vpc_security_group_memberships", null)
 
-  tags = "${merge(var.tags, local.tags)}"
+      dynamic "option_settings" {
+        for_each = lookup(option.value, "option_settings", [])
+        content {
+          name  = option_settings.value.name
+          value = option_settings.value.value
+        }
+      }
+    }
+  }
+
+  tags = merge(var.tags, local.tags)
 
   lifecycle {
     create_before_destroy = true
@@ -186,11 +240,11 @@ data "aws_iam_policy_document" "assume_role_policy" {
 }
 
 resource "aws_iam_role" "enhanced_monitoring_role" {
-  count = "${var.existing_monitoring_role == ""  && var.monitoring_interval > 0 ? 1 : 0}"
+  count = var.existing_monitoring_role == "" && var.monitoring_interval > 0 ? 1 : 0
 
   name_prefix = "${var.name}-"
 
-  assume_role_policy = "${data.aws_iam_policy_document.assume_role_policy.json}"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 
   lifecycle {
     create_before_destroy = true
@@ -198,83 +252,95 @@ resource "aws_iam_role" "enhanced_monitoring_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "enhanced_monitoring_policy" {
-  count = "${var.existing_monitoring_role == ""  && var.monitoring_interval > 0 ? 1 : 0}"
+  count = var.existing_monitoring_role == "" && var.monitoring_interval > 0 ? 1 : 0
 
-  role       = "${aws_iam_role.enhanced_monitoring_role.name}"
+  role       = aws_iam_role.enhanced_monitoring_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
 
 locals {
-  subnet_group        = "${coalesce(var.existing_subnet_group, join("", aws_db_subnet_group.db_subnet_group.*.id))}"
-  parameter_group     = "${coalesce(var.existing_parameter_group_name, join("", aws_db_parameter_group.db_parameter_group.*.id))}"
-  option_group        = "${coalesce(var.existing_option_group_name, join("", aws_db_option_group.db_option_group.*.id))}"
-  monitoring_role_arn = "${coalesce(var.existing_monitoring_role, join("", aws_iam_role.enhanced_monitoring_role.*.arn))}"
+  subnet_group = coalesce(
+    var.existing_subnet_group,
+    join("", aws_db_subnet_group.db_subnet_group.*.id),
+  )
+  parameter_group = coalesce(
+    var.existing_parameter_group_name,
+    join("", aws_db_parameter_group.db_parameter_group.*.id),
+  )
+  option_group = coalesce(
+    var.existing_option_group_name,
+    join("", aws_db_option_group.db_option_group.*.id),
+  )
+  monitoring_role_arn = coalesce(
+    var.existing_monitoring_role,
+    join("", aws_iam_role.enhanced_monitoring_role.*.arn),
+  )
 }
 
 resource "aws_db_instance" "db_instance" {
   identifier_prefix = "${lower(var.name)}-"
 
-  engine         = "${var.engine}"
-  engine_version = "${local.engine_version}"
-  instance_class = "${var.instance_class}"
-  port           = "${local.port}"
+  engine         = var.engine
+  engine_version = local.engine_version
+  instance_class = var.instance_class
+  port           = local.port
 
-  deletion_protection = "${var.enable_deletion_protection}"
+  deletion_protection = var.enable_deletion_protection
 
-  allocated_storage     = "${local.storage_size}"
-  max_allocated_storage = "${var.max_storage_size}"
-  storage_type          = "${var.storage_type}"
-  storage_encrypted     = "${var.storage_encrypted}"
-  iops                  = "${var.storage_iops}"
-  kms_key_id            = "${var.kms_key_id}"
+  allocated_storage     = local.storage_size
+  max_allocated_storage = var.max_storage_size
+  storage_type          = var.storage_type
+  storage_encrypted     = var.storage_encrypted
+  iops                  = var.storage_iops
+  kms_key_id            = var.kms_key_id
 
-  name                                = "${var.dbname}"
-  username                            = "${var.username}"
-  password                            = "${var.password}"
-  iam_database_authentication_enabled = "${var.iam_authentication_enabled}"
+  name                                = var.dbname
+  username                            = var.username
+  password                            = var.password
+  iam_database_authentication_enabled = var.iam_authentication_enabled
 
-  replicate_source_db = "${var.source_db}"
-  snapshot_identifier = "${var.db_snapshot_id}"
+  replicate_source_db = var.source_db
+  snapshot_identifier = var.db_snapshot_id
 
-  vpc_security_group_ids = ["${var.security_groups}"]
-  db_subnet_group_name   = "${local.same_region_replica ? "" : local.subnet_group}"
-  parameter_group_name   = "${local.same_region_replica ? "" : local.parameter_group}"
-  option_group_name      = "${local.same_region_replica ? "" : local.option_group}"
-  multi_az               = "${var.read_replica ? false : var.multi_az}"
-  publicly_accessible    = "${var.publicly_accessible}"
+  vpc_security_group_ids = var.security_groups
+  db_subnet_group_name   = local.same_region_replica ? "" : local.subnet_group
+  parameter_group_name   = local.same_region_replica ? "" : local.parameter_group
+  option_group_name      = local.same_region_replica ? "" : local.option_group
+  multi_az               = var.read_replica ? false : var.multi_az
+  publicly_accessible    = var.publicly_accessible
 
-  monitoring_interval = "${var.monitoring_interval}"
-  monitoring_role_arn = "${local.monitoring_role_arn}"
+  monitoring_interval = var.monitoring_interval
+  monitoring_role_arn = local.monitoring_role_arn
 
   allow_major_version_upgrade = false
-  auto_minor_version_upgrade  = "${var.auto_minor_version_upgrade}"
-  maintenance_window          = "${var.maintenance_window}"
-  skip_final_snapshot         = "${var.read_replica || var.skip_final_snapshot}"
-  copy_tags_to_snapshot       = "${var.copy_tags_to_snapshot}"
+  auto_minor_version_upgrade  = var.auto_minor_version_upgrade
+  maintenance_window          = var.maintenance_window
+  skip_final_snapshot         = var.read_replica || var.skip_final_snapshot
+  copy_tags_to_snapshot       = var.copy_tags_to_snapshot
   final_snapshot_identifier   = "${lower(var.name)}-final-snapshot${var.final_snapshot_suffix == "" ? "" : "-${lower(var.final_snapshot_suffix)}"}"
-  backup_retention_period     = "${var.read_replica ? 0 : var.backup_retention_period}"
-  backup_window               = "${var.backup_window}"
-  apply_immediately           = "${var.apply_immediately}"
+  backup_retention_period     = var.read_replica ? 0 : var.backup_retention_period
+  backup_window               = var.backup_window
+  apply_immediately           = var.apply_immediately
 
-  license_model      = "${local.license_model}"
-  character_set_name = "${local.is_oracle ? var.character_set_name : ""}"
-  timezone           = "${local.is_mssql ? var.timezone : ""}"
+  license_model      = local.license_model
+  character_set_name = local.is_oracle ? var.character_set_name : ""
+  timezone           = local.is_mssql ? var.timezone : ""
 
-  tags = "${merge(var.tags, local.tags)}"
+  tags = merge(var.tags, local.tags)
 
-  timeouts = {
-    create = "${var.db_instance_create_timeout}"
-    update = "${var.db_instance_update_timeout}"
-    delete = "${var.db_instance_delete_timeout}"
+  timeouts {
+    create = var.db_instance_create_timeout
+    update = var.db_instance_update_timeout
+    delete = var.db_instance_delete_timeout
   }
 
   # Option Group, Parameter Group, and Subnet Group added as the coalesce to use any existing groups seems to throw off
   # dependancies while destroying resources
   depends_on = [
-    "aws_iam_role_policy_attachment.enhanced_monitoring_policy",
-    "aws_db_option_group.db_option_group",
-    "aws_db_parameter_group.db_parameter_group",
-    "aws_db_subnet_group.db_subnet_group",
+    aws_iam_role_policy_attachment.enhanced_monitoring_policy,
+    aws_db_option_group.db_option_group,
+    aws_db_parameter_group.db_parameter_group,
+    aws_db_subnet_group.db_subnet_group,
   ]
 }
 
@@ -287,40 +353,44 @@ module "free_storage_space_alarm_ticket" {
   evaluation_periods       = 30
   metric_name              = "FreeStorageSpace"
   namespace                = "AWS/RDS"
-  notification_topic       = ["${var.notification_topic}"]
+  notification_topic       = [var.notification_topic]
   period                   = 60
-  rackspace_alarms_enabled = "${var.rackspace_alarms_enabled}"
-  rackspace_managed        = "${var.rackspace_managed}"
+  rackspace_alarms_enabled = var.rackspace_alarms_enabled
+  rackspace_managed        = var.rackspace_managed
   severity                 = "urgent"
   statistic                = "Average"
-  threshold                = "${var.alarm_free_space_limit}"
+  threshold                = var.alarm_free_space_limit
 
-  dimensions = [{
-    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
-  }]
+  dimensions = [
+    {
+      DBInstanceIdentifier = aws_db_instance.db_instance.id
+    },
+  ]
 }
 
 module "replica_lag_alarm_ticket" {
   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm?ref=v0.0.1"
 
-  alarm_count              = "${var.read_replica ? 1 : 0}"
+  alarm_count              = var.read_replica ? 1 : 0
   alarm_description        = "ReplicaLag has exceeded threshold, generating ticket.."
   alarm_name               = "${var.name}-replica-lag-ticket"
   comparison_operator      = "GreaterThanOrEqualToThreshold"
   evaluation_periods       = 5
   metric_name              = "ReplicaLag"
   namespace                = "AWS/RDS"
-  notification_topic       = ["${var.notification_topic}"]
+  notification_topic       = [var.notification_topic]
   period                   = 60
-  rackspace_alarms_enabled = "${var.rackspace_alarms_enabled}"
-  rackspace_managed        = "${var.rackspace_managed}"
+  rackspace_alarms_enabled = var.rackspace_alarms_enabled
+  rackspace_managed        = var.rackspace_managed
   severity                 = "urgent"
   statistic                = "Average"
   threshold                = 3600
 
-  dimensions = [{
-    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
-  }]
+  dimensions = [
+    {
+      DBInstanceIdentifier = aws_db_instance.db_instance.id
+    },
+  ]
 }
 
 module "free_storage_space_alarm_email" {
@@ -333,15 +403,17 @@ module "free_storage_space_alarm_email" {
   evaluation_periods       = 30
   metric_name              = "FreeStorageSpace"
   namespace                = "AWS/RDS"
-  notification_topic       = ["${var.notification_topic}"]
+  notification_topic       = [var.notification_topic]
   period                   = 60
   rackspace_alarms_enabled = false
   statistic                = "Average"
   threshold                = 3072000000
 
-  dimensions = [{
-    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
-  }]
+  dimensions = [
+    {
+      DBInstanceIdentifier = aws_db_instance.db_instance.id
+    },
+  ]
 }
 
 module "write_iops_high_alarm_email" {
@@ -354,15 +426,17 @@ module "write_iops_high_alarm_email" {
   evaluation_periods       = 5
   metric_name              = "WriteIOPS"
   namespace                = "AWS/RDS"
-  notification_topic       = ["${var.notification_topic}"]
+  notification_topic       = [var.notification_topic]
   period                   = 60
   rackspace_alarms_enabled = false
   statistic                = "Average"
-  threshold                = "${var.alarm_write_iops_limit}"
+  threshold                = var.alarm_write_iops_limit
 
-  dimensions = [{
-    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
-  }]
+  dimensions = [
+    {
+      DBInstanceIdentifier = aws_db_instance.db_instance.id
+    },
+  ]
 }
 
 module "read_iops_high_alarm_email" {
@@ -375,15 +449,17 @@ module "read_iops_high_alarm_email" {
   evaluation_periods       = 5
   metric_name              = "ReadIOPS"
   namespace                = "AWS/RDS"
-  notification_topic       = ["${var.notification_topic}"]
+  notification_topic       = [var.notification_topic]
   period                   = 60
   rackspace_alarms_enabled = false
   statistic                = "Average"
-  threshold                = "${var.alarm_read_iops_limit}"
+  threshold                = var.alarm_read_iops_limit
 
-  dimensions = [{
-    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
-  }]
+  dimensions = [
+    {
+      DBInstanceIdentifier = aws_db_instance.db_instance.id
+    },
+  ]
 }
 
 module "cpu_high_alarm_email" {
@@ -396,21 +472,23 @@ module "cpu_high_alarm_email" {
   evaluation_periods       = 15
   metric_name              = "CPUUtilization"
   namespace                = "AWS/RDS"
-  notification_topic       = ["${var.notification_topic}"]
+  notification_topic       = [var.notification_topic]
   period                   = 60
   rackspace_alarms_enabled = false
   statistic                = "Average"
-  threshold                = "${var.alarm_cpu_limit}"
+  threshold                = var.alarm_cpu_limit
 
-  dimensions = [{
-    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
-  }]
+  dimensions = [
+    {
+      DBInstanceIdentifier = aws_db_instance.db_instance.id
+    },
+  ]
 }
 
 module "replica_lag_alarm_email" {
   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm?ref=v0.0.1"
 
-  alarm_count              = "${var.read_replica ? 1 : 0}"
+  alarm_count              = var.read_replica ? 1 : 0
   alarm_description        = "ReplicaLag has exceeded threshold."
   alarm_name               = "${var.name}-replica-lag-email"
   comparison_operator      = "GreaterThanOrEqualToThreshold"
@@ -418,33 +496,35 @@ module "replica_lag_alarm_email" {
   evaluation_periods       = 3
   metric_name              = "ReplicaLag"
   namespace                = "AWS/RDS"
-  notification_topic       = ["${var.notification_topic}"]
+  notification_topic       = [var.notification_topic]
   period                   = 60
   rackspace_alarms_enabled = false
   statistic                = "Average"
   threshold                = 3600
 
-  dimensions = [{
-    DBInstanceIdentifier = "${aws_db_instance.db_instance.id}"
-  }]
+  dimensions = [
+    {
+      DBInstanceIdentifier = aws_db_instance.db_instance.id
+    },
+  ]
 }
 
 resource "aws_db_event_subscription" "default" {
-  count = "${length(var.event_categories) > 0 ? 1 : 0}"
+  count = length(var.event_categories) > 0 ? 1 : 0
 
   name_prefix      = "${lower(var.name)}-"
-  event_categories = "${var.event_categories}"
-  sns_topic        = "${var.notification_topic}"
+  event_categories = var.event_categories
+  sns_topic        = var.notification_topic
   source_type      = "db-instance"
-  source_ids       = ["${aws_db_instance.db_instance.id}"]
+  source_ids       = [aws_db_instance.db_instance.id]
 }
 
 resource "aws_route53_record" "zone_record_alias" {
-  count = "${var.internal_record_name != "" ? 1 : 0}"
+  count = var.internal_record_name != "" ? 1 : 0
 
   name    = "${var.internal_record_name}.${var.internal_zone_name}"
   ttl     = "300"
   type    = "CNAME"
-  zone_id = "${var.internal_zone_id}"
-  records = ["${aws_db_instance.db_instance.address}"]
+  zone_id = var.internal_zone_id
+  records = [aws_db_instance.db_instance.address]
 }
