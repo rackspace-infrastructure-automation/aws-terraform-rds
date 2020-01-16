@@ -182,5 +182,4 @@ module "rds_postgres_latest" {
   create_option_group = false
   skip_final_snapshot = true
   storage_size        = 100
-  max_storage_size    = 200
 }

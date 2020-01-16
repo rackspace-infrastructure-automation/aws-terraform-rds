@@ -222,7 +222,6 @@ resource "aws_db_instance" "db_instance" {
   deletion_protection = "${var.enable_deletion_protection}"
 
   allocated_storage     = "${local.storage_size}"
-  max_allocated_storage = "${var.max_storage_size}"
   storage_type          = "${var.storage_type}"
   storage_encrypted     = "${var.storage_encrypted}"
   iops                  = "${var.storage_iops}"
@@ -259,6 +258,7 @@ resource "aws_db_instance" "db_instance" {
   license_model      = "${local.license_model}"
   character_set_name = "${local.is_oracle ? var.character_set_name : ""}"
   timezone           = "${local.is_mssql ? var.timezone : ""}"
+  ca_cert_identifier = "${var.ca_cert_identifier}"
 
   tags = "${merge(var.tags, local.tags)}"
 

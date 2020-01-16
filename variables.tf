@@ -123,12 +123,6 @@ variable "storage_size" {
   default     = ""
 }
 
-variable "max_storage_size" {
-  description = "Select Max RDS Volume Size in GB. Value other than 0 will enable storage autoscaling"
-  type        = "string"
-  default     = "0"
-}
-
 variable "storage_type" {
   description = "Select RDS Volume Type."
   type        = "string"
@@ -282,6 +276,12 @@ variable "username" {
 variable "apply_immediately" {
   description = "Should database modifications be applied immediately?"
   default     = false
+  type        = "string"
+}
+
+variable "ca_cert_identifier" {
+  description = "Specify CA authority to use"
+  default     = ""
   type        = "string"
 }
 
