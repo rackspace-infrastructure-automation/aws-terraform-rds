@@ -3,7 +3,7 @@ terraform {
 }
 
 provider "aws" {
-  version = "~> 2.2"
+  version = "~> 2.7"
   region  = "us-west-2"
 }
 
@@ -41,13 +41,13 @@ resource "random_string" "mssql_name" {
 }
 
 module "vpc" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=master"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=v0.12.1"
 
   name = "${random_string.identifier.result}VPC-1"
 }
 
 module "vpc_dr" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=master"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=v0.12.1"
 
   name = "${random_string.identifier.result}VPC-2"
 

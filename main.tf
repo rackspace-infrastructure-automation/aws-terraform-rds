@@ -1,4 +1,4 @@
-/**
+/*
  * # aws-terraform-rds
  *
  * This module creates an RDS instance.  It currently supports master, replica, and cross region replica RDS instances.
@@ -24,9 +24,9 @@
  *
  * - Terraform does not support joining a Microsoft SQL RDS instance to a Directory Service at this time.  This has been requested in https://github.com/terraform-providers/terraform-provider-aws/pull/5378 and can be added once that functionality is present.
  *
- *## Terraform 0.12 upgrade
+ * ## Terraform 0.12 upgrade
  *
- *There should be no changes required to move from previous versions of this module to version 0.12.0 or higher.
+ * There should be no changes required to move from previous versions of this module to version 0.12.0 or higher.
  *
  * ## Other TF Modules Used
  * Using [aws-terraform-cloudwatch_alarm](https://github.com/rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm) to create the following CloudWatch Alarms:
