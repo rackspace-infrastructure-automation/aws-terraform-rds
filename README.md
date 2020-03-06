@@ -6,12 +6,12 @@ This module creates an RDS instance.  It currently supports master, replica, and
 
 ```HCL
 module "rds" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.0"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.1"
 
   engine            = "mysql"                         #  Required
   instance_class    = "db.t2.large"                   #  Required
   name              = "sample-mysql-rds"              #  Required
-  password = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
+  password          = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
   security_groups   = ["${module.vpc.default_sg}"]    #  Required
   storage_encrypted = true                            #  Parameter defaults to false, but enabled for Cross Region Replication example
   subnets           = "${module.vpc.private_subnets}" #  Required
