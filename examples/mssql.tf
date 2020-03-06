@@ -3,36 +3,38 @@ terraform {
 }
 
 provider "aws" {
-  version = "~> 2.2"
+  version = "~> 2.7"
   region  = "us-east-1"
 }
 
-data "aws_kms_secrets" "rds_credentials" {
-  secret {
-    name    = "password"
-    payload = "AQICAHj9P8B8y7UnmuH+/93CxzvYyt+la85NUwzunlBhHYQwSAG+eG8tr978ncilIYv5lj1OAAAAaDBmBgkqhkiG9w0BBwagWTBXAgEAMFIGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMoasNhkaRwpAX9sglAgEQgCVOmIaSSj/tJgEE5BLBBkq6FYjYcUm6Dd09rGPFdLBihGLCrx5H"
-  }
+# this is for example purposes, please use best practice for secret storage in a production environment
+resource "random_string" "password" {
+  length      = 16
+  min_numeric = 1
+  min_lower   = 1
+  min_upper   = 1
+  special     = false
 }
 
 module "vpc" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=v0.12.0"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=v0.12.1"
 
   name = "Test1VPC"
 }
 
 module "rds_mssql" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.0"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.1"
 
   ##################
   # Required Configuration
   ##################
 
-  engine          = "sqlserver-se"                                             #  Required
-  instance_class  = "db.m4.large"                                              #  Required
-  name            = "sample-mssql-rds"                                         #  Required
-  password        = data.aws_kms_secrets.rds_credentials.plaintext["password"] #  Required
-  security_groups = [module.vpc.default_sg]                                    #  Required
-  subnets         = module.vpc.private_subnets                                 #  Required
+  engine          = "sqlserver-se"                #  Required
+  instance_class  = "db.m4.large"                 #  Required
+  name            = "sample-mssql-rds"            #  Required
+  password        = random_string.password.result #  Required - see usage warning at top of file
+  security_groups = [module.vpc.default_sg]       #  Required
+  subnets         = module.vpc.private_subnets    #  Required
   # username      = "dbadmin"
 
   ##################

@@ -6,19 +6,19 @@ This module creates an RDS instance.  It currently supports master, replica, and
 
 ```HCL
 module "rds" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.0"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.1"
 
   engine            = "mysql"                         #  Required
   instance_class    = "db.t2.large"                   #  Required
   name              = "sample-mysql-rds"              #  Required
-  password = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
+  password          = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
   security_groups   = ["${module.vpc.default_sg}"]    #  Required
   storage_encrypted = true                            #  Parameter defaults to false, but enabled for Cross Region Replication example
   subnets           = "${module.vpc.private_subnets}" #  Required
 }
 ```
 
-Full working references are available at [examples](examples)  
+Full working references are available at [examples](examples)
 ## Limitations
 
 - Terraform does not support joining a Microsoft SQL RDS instance to a Directory Service at this time.  This has been requested in https://github.com/terraform-providers/terraform-provider-aws/pull/5378 and can be added once that functionality is present.
@@ -28,13 +28,13 @@ Full working references are available at [examples](examples)
 There should be no changes required to move from previous versions of this module to version 0.12.0 or higher.
 
 ## Other TF Modules Used  
-Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm) to create the following CloudWatch Alarms:  
-	- free\_storage\_space\_alarm\_ticket  
-	- replica\_lag\_alarm\_ticket  
-	- free\_storage\_space\_alarm\_email  
-	- write\_iops\_high\_alarm\_email  
-	- read\_iops\_high\_alarm\_email  
-	- cpu\_high\_alarm\_email  
+Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm) to create the following CloudWatch Alarms:
+	- free\_storage\_space\_alarm\_ticket
+	- replica\_lag\_alarm\_ticket
+	- free\_storage\_space\_alarm\_email
+	- write\_iops\_high\_alarm\_email
+	- read\_iops\_high\_alarm\_email
+	- cpu\_high\_alarm\_email
 	- replica\_lag\_alarm\_email
 
 ## Providers

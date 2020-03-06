@@ -1,4 +1,4 @@
-/**
+/*
  * # aws-terraform-rds
  *
  * This module creates an RDS instance.  It currently supports master, replica, and cross region replica RDS instances.
@@ -7,12 +7,12 @@
  *
  * ```HCL
  * module "rds" {
- *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.0"
+ *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.1"
  *
  *   engine            = "mysql"                         #  Required
  *   instance_class    = "db.t2.large"                   #  Required
  *   name              = "sample-mysql-rds"              #  Required
- *   password = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
+ *   password          = "${data.aws_kms_secrets.rds_credentials.plaintext["password"]}" #  Required
  *   security_groups   = ["${module.vpc.default_sg}"]    #  Required
  *   storage_encrypted = true                            #  Parameter defaults to false, but enabled for Cross Region Replication example
  *   subnets           = "${module.vpc.private_subnets}" #  Required
@@ -24,9 +24,9 @@
  *
  * - Terraform does not support joining a Microsoft SQL RDS instance to a Directory Service at this time.  This has been requested in https://github.com/terraform-providers/terraform-provider-aws/pull/5378 and can be added once that functionality is present.
  *
- *## Terraform 0.12 upgrade
+ * ## Terraform 0.12 upgrade
  *
- *There should be no changes required to move from previous versions of this module to version 0.12.0 or higher.
+ * There should be no changes required to move from previous versions of this module to version 0.12.0 or higher.
  *
  * ## Other TF Modules Used
  * Using [aws-terraform-cloudwatch_alarm](https://github.com/rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm) to create the following CloudWatch Alarms:
@@ -54,7 +54,8 @@ locals {
   is_postgres   = local.engine_class == "postgres"
   is_postgres10 = local.engine_class == "postgres" && local.postgres_major_version == "10" # To allow setting postgresql specific settings
   is_postgres11 = local.engine_class == "postgres" && local.postgres_major_version == "11" # To allow setting postgresql specific settings
-  is_oracle18   = local.engine_class == "oracle" && local.oracle_major_version == "18"     # To allow setting Oracle specific settings
+  is_oracle18   = local.engine_class == "oracle" && local.oracle_major_version == "18"     # To allow setting Oracle 18 specific settings
+  is_oracle19   = local.engine_class == "oracle" && local.oracle_major_version == "19"     # To allow setting Oracle 19 specific settings
 
   # This map contains default values for several properties if they are explicitly defined.
   # Should be occasionally updated as newer engine versions are released
@@ -67,7 +68,7 @@ locals {
     }
     oracle = {
       port         = "1521"
-      version      = "18.0.0.0.ru-2019-07.rur-2019-07.r1"
+      version      = "19.0.0.0.ru-2020-01.rur-2020-01.r1"
       storage_size = "100"
       license      = "license-included"
       jdbc_proto   = "oracle:thin"
@@ -124,7 +125,7 @@ locals {
 
   # Break up the engine version in to chunks to get the major version part.  This is a single number for PostgreSQL10/11
   # and two numbers for all other engines (ex: 5.7).
-  version_chunk = chunklist(split(".", local.engine_version), local.is_postgres10 || local.is_postgres11 || local.is_oracle18 ? 1 : 2)
+  version_chunk = chunklist(split(".", local.engine_version), local.is_postgres10 || local.is_postgres11 || local.is_oracle18 || local.is_oracle19 ? 1 : 2)
   major_version = join(".", local.version_chunk[0])
 
   # We will use a '-' to join engine and major version for Oracle and MSSQL, and an empty string for other engines.

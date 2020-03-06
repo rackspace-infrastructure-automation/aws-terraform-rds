@@ -3,7 +3,7 @@ terraform {
 }
 
 provider "aws" {
-  version = "~> 2.2"
+  version = "~> 2.7"
   region  = "us-west-2"
 }
 
@@ -41,13 +41,13 @@ resource "random_string" "mssql_name" {
 }
 
 module "vpc" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=master"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=v0.12.1"
 
   name = "${random_string.identifier.result}VPC-1"
 }
 
 module "vpc_dr" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=master"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-vpc_basenetwork?ref=v0.12.1"
 
   name = "${random_string.identifier.result}VPC-2"
 
@@ -157,13 +157,30 @@ module "rds_mssql_latest" {
 ########################
 #        Oracle        #
 ########################
-module "rds_oracle_latest" {
+
+# oracle 18
+module "rds_oracle_18" {
+  source = "../../module"
+
+  create_option_group = false
+  engine              = "oracle-se2"
+  engine_version      = "18.0.0.0.ru-2019-07.rur-2019-07.r1"
+  instance_class      = "db.t3.large"
+  name                = "oracle18-${random_string.identifier.result}"
+  password            = random_string.password.result
+  security_groups     = [module.vpc.default_sg]
+  skip_final_snapshot = true
+  subnets             = module.vpc.private_subnets
+}
+
+# defaults to oracle 19
+module "rds_oracle_19" {
   source = "../../module"
 
   create_option_group = false
   engine              = "oracle-se2"
   instance_class      = "db.t3.large"
-  name                = "oracle-${random_string.identifier.result}"
+  name                = "oracle19-${random_string.identifier.result}"
   password            = random_string.password.result
   security_groups     = [module.vpc.default_sg]
   skip_final_snapshot = true
