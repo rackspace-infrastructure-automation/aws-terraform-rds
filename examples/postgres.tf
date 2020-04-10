@@ -8,8 +8,9 @@ provider "aws" {
 }
 
 provider "aws" {
-  region = "us-west-2"
-  alias  = "oregon"
+  alias   = "oregon"
+  region  = "us-west-2"
+  version = "~> 2.7"
 }
 
 # this is for example purposes, please use best practice for secret storage in a production environment
