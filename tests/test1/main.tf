@@ -8,8 +8,9 @@ provider "aws" {
 }
 
 provider "aws" {
-  region = "us-east-2"
-  alias  = "ohio"
+  alias   = "ohio"
+  region  = "us-east-2"
+  version = "~> 2.7"
 }
 
 provider "random" {
