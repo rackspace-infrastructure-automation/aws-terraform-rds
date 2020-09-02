@@ -247,6 +247,12 @@ variable "monitoring_interval" {
   default     = 0
 }
 
+variable "rds_monitoring_role_arn_app" {
+  description = "The ARN for the IAM role that permits RDS to send enhanced monitoring metrics to CloudWatch Logs. Must be specified if monitoring_interval is non-zero."
+  type        = "string"
+  default     = "arn:aws:iam::596390022321:role/rds-monitoring-role"
+}
+
 variable "notification_topic" {
   description = "SNS Topic ARN to use for customer notifications from CloudWatch alarms. (OPTIONAL)"
   type        = "string"
