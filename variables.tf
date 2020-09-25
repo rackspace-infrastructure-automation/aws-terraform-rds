@@ -249,8 +249,14 @@ variable "notification_topic" {
 
 variable "options" {
   description = "List of custom options to apply to the option group."
-  type        = list(map(string))
-  default     = []
+  type = list(object({
+    option_name = string
+    option_settings = object({
+      name  = string
+      value = string
+    })
+  }))
+  default = []
 }
 
 variable "parameters" {

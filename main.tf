@@ -7,7 +7,7 @@
  *
  * ```HCL
  * module "rds" {
- *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.1"
+ *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.4"
  *
  *   engine            = "mysql"                         #  Required
  *   instance_class    = "db.t2.large"                   #  Required

@@ -6,7 +6,7 @@ This module creates an RDS instance.  It currently supports master, replica, and
 
 ```HCL
 module "rds" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.1"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.4"
 
   engine            = "mysql"                         #  Required
   instance_class    = "db.t2.large"                   #  Required
@@ -89,7 +89,7 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 | multi\_az | Create a multi-AZ RDS database instance | `bool` | `true` | no |
 | name | The name prefix to use for the resources created in this module. | `string` | n/a | yes |
 | notification\_topic | SNS Topic ARN to use for customer notifications from CloudWatch alarms. (OPTIONAL) | `string` | `""` | no |
-| options | List of custom options to apply to the option group. | `list(map(string))` | `[]` | no |
+| options | List of custom options to apply to the option group. | <pre>list(object({<br>    option_name = string<br>    option_settings = object({<br>      name  = string<br>      value = string<br>    })<br>  }))</pre> | `[]` | no |
 | parameters | List of custom parameters to apply to the parameter group. | `list(map(string))` | `[]` | no |
 | password | Password for the local administrator account. | `string` | n/a | yes |
 | port | The port on which the DB accepts connections | `string` | `""` | no |
