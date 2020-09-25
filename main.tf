@@ -191,7 +191,7 @@ resource "aws_db_option_group" "db_option_group" {
       vpc_security_group_memberships = lookup(option.value, "vpc_security_group_memberships", null)
 
       dynamic "option_settings" {
-        for_each = lookup(option.value, "option_settings", [])
+        for_each = [lookup(option.value, "option_settings", null)]
         content {
           name  = option_settings.value.name
           value = option_settings.value.value
