@@ -7,7 +7,7 @@
  *
  * ```HCL
  * module "rds" {
- *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.1"
+ *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.4"
  *
  *   engine            = "mysql"                         #  Required
  *   instance_class    = "db.t2.large"                   #  Required
@@ -191,7 +191,7 @@ resource "aws_db_option_group" "db_option_group" {
       vpc_security_group_memberships = lookup(option.value, "vpc_security_group_memberships", null)
 
       dynamic "option_settings" {
-        for_each = lookup(option.value, "option_settings", [])
+        for_each = [lookup(option.value, "option_settings", null)]
         content {
           name  = option_settings.value.name
           value = option_settings.value.value

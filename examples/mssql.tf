@@ -23,7 +23,7 @@ module "vpc" {
 }
 
 module "rds_mssql" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.1"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.4"
 
   ##################
   # Required Configuration

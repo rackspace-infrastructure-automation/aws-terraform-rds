@@ -249,7 +249,7 @@ variable "notification_topic" {
 
 variable "options" {
   description = "List of custom options to apply to the option group."
-  type        = list(map(string))
+  type        = list
   default     = []
 }
 
