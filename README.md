@@ -37,13 +37,6 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 	- cpu\_high\_alarm\_email
 	- replica\_lag\_alarm\_email
 
-## Requirements
-
-| Name | Version |
-|------|---------|
-| terraform | >= 0.12 |
-| aws | >= 2.7.0 |
-
 ## Providers
 
 | Name | Version |
