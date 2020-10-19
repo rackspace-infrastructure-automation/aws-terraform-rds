@@ -254,7 +254,7 @@ resource "aws_db_instance" "db_instance" {
   copy_tags_to_snapshot               = var.copy_tags_to_snapshot
   db_subnet_group_name                = local.same_region_replica ? null : local.subnet_group
   deletion_protection                 = var.enable_deletion_protection
-  enabled_cloudwatch_logs_exports     = var.list_of_cloudwatch_exports
+  enabled_cloudwatch_logs_exports     = var.cloudwatch_exports_logs_list
   engine                              = var.engine
   engine_version                      = local.engine_version
   final_snapshot_identifier           = lower("${var.name}-final-snapshot${var.final_snapshot_suffix == "" ? "" : "-"}${var.final_snapshot_suffix}")
