@@ -211,6 +211,12 @@ variable "license_model" {
   default     = ""
 }
 
+variable "list_of_cloudwatch_exports" {
+  description = "list of log exports"
+  type        = list(string)
+  default     = []
+}
+
 variable "maintenance_window" {
   description = "The daily time range during which automated backups are created if automated backups are enabled."
   type        = string
