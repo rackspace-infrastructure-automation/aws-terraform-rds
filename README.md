@@ -37,13 +37,6 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 	- cpu\_high\_alarm\_email
 	- replica\_lag\_alarm\_email
 
-## Requirements
-
-| Name | Version |
-|------|---------|
-| terraform | >= 0.12 |
-| aws | >= 2.7.0 |
-
 ## Providers
 
 | Name | Version |
@@ -53,7 +46,7 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+|------|-------------|------|---------|:-----:|
 | alarm\_cpu\_limit | CloudWatch CPUUtilization Threshold | `number` | `60` | no |
 | alarm\_free\_space\_limit | CloudWatch Free Storage Space Limit Threshold (Bytes) | `number` | `1024000000` | no |
 | alarm\_read\_iops\_limit | CloudWatch Read IOPSLimit Threshold | `number` | `100` | no |
