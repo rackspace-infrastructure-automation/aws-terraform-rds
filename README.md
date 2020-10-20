@@ -93,6 +93,8 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 | options | List of custom options to apply to the option group. | `list` | `[]` | no |
 | parameters | List of custom parameters to apply to the parameter group. | `list(map(string))` | `[]` | no |
 | password | Password for the local administrator account. | `string` | n/a | yes |
+| performance_insights_kms_key_id | KMS Key ID for performance insights (if retention specified). | `string` | `""` | no |
+| performance_insights_retention_period | Retention duration for performance insights. Can be enabled with 7 or 731. | `number` | `0`| no |
 | port | The port on which the DB accepts connections | `string` | `""` | no |
 | publicly\_accessible | Boolean value that indicates whether the database instance is an Internet-facing instance. | `bool` | `false` | no |
 | rackspace\_alarms\_enabled | Specifies whether non-emergency rackspace alarms will create a ticket. | `bool` | `false` | no |
@@ -124,4 +126,3 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 | option\_group | The Option Group used by the DB Instance |
 | parameter\_group | The Parameter Group used by the DB Instance |
 | subnet\_group | The DB Subnet Group used by the DB Instance |
-
