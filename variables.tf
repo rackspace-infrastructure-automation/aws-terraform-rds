@@ -270,6 +270,18 @@ variable "password" {
   type        = string
 }
 
+variable "performance_insights_kms_key_id" {
+  description = "KMS Key ID for performance insights (if retention specified)."
+  type        = string
+  default     = ""
+}
+
+variable "performance_insights_retention_period" {
+  description = "Retention duration for performance insights. Can be enabled with 7 or 731."
+  type        = number
+  default     = 0
+}
+
 variable "port" {
   description = "The port on which the DB accepts connections"
   type        = string

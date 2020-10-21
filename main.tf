@@ -236,54 +236,59 @@ resource "aws_iam_role_policy_attachment" "enhanced_monitoring_policy" {
 }
 
 locals {
-  subnet_group        = length(aws_db_subnet_group.db_subnet_group.*.id) > 0 ? aws_db_subnet_group.db_subnet_group[0].id : var.existing_subnet_group
-  parameter_group     = length(aws_db_parameter_group.db_parameter_group.*.id) > 0 ? aws_db_parameter_group.db_parameter_group[0].id : var.existing_parameter_group_name
-  option_group        = length(aws_db_option_group.db_option_group.*.id) > 0 ? aws_db_option_group.db_option_group[0].id : var.existing_option_group_name
-  monitoring_role_arn = length(aws_iam_role.enhanced_monitoring_role.*.arn) > 0 ? aws_iam_role.enhanced_monitoring_role[0].arn : var.existing_monitoring_role
+  subnet_group                          = length(aws_db_subnet_group.db_subnet_group.*.id) > 0 ? aws_db_subnet_group.db_subnet_group[0].id : var.existing_subnet_group
+  parameter_group                       = length(aws_db_parameter_group.db_parameter_group.*.id) > 0 ? aws_db_parameter_group.db_parameter_group[0].id : var.existing_parameter_group_name
+  option_group                          = length(aws_db_option_group.db_option_group.*.id) > 0 ? aws_db_option_group.db_option_group[0].id : var.existing_option_group_name
+  monitoring_role_arn                   = length(aws_iam_role.enhanced_monitoring_role.*.arn) > 0 ? aws_iam_role.enhanced_monitoring_role[0].arn : var.existing_monitoring_role
+  performance_insights_enabled          = var.performance_insights_retention_period == 0 ? false : true
+  performance_insights_retention_period = var.performance_insights_retention_period > 7 ? 731 : 7
 }
 
 resource "aws_db_instance" "db_instance" {
 
-  allocated_storage                   = local.storage_size
-  allow_major_version_upgrade         = false
-  apply_immediately                   = var.apply_immediately
-  auto_minor_version_upgrade          = var.auto_minor_version_upgrade
-  backup_retention_period             = var.read_replica ? 0 : var.backup_retention_period
-  backup_window                       = var.backup_window
-  character_set_name                  = local.is_oracle ? var.character_set_name : null
-  copy_tags_to_snapshot               = var.copy_tags_to_snapshot
-  db_subnet_group_name                = local.same_region_replica ? null : local.subnet_group
-  deletion_protection                 = var.enable_deletion_protection
-  enabled_cloudwatch_logs_exports     = var.cloudwatch_exports_logs_list
-  engine                              = var.engine
-  engine_version                      = local.engine_version
-  final_snapshot_identifier           = lower("${var.name}-final-snapshot${var.final_snapshot_suffix == "" ? "" : "-"}${var.final_snapshot_suffix}")
-  iam_database_authentication_enabled = var.iam_authentication_enabled
-  identifier_prefix                   = "${lower(var.name)}-"
-  instance_class                      = var.instance_class
-  iops                                = var.storage_iops
-  kms_key_id                          = var.kms_key_id
-  license_model                       = var.license_model == "" ? local.license_model : var.license_model
-  maintenance_window                  = var.maintenance_window
-  max_allocated_storage               = var.max_storage_size
-  monitoring_interval                 = var.monitoring_interval
-  monitoring_role_arn                 = var.monitoring_interval > 0 ? local.monitoring_role_arn : null
-  multi_az                            = var.read_replica ? false : var.multi_az
-  name                                = var.dbname
-  option_group_name                   = local.same_region_replica ? null : local.option_group
-  parameter_group_name                = local.same_region_replica ? null : local.parameter_group
-  password                            = var.password
-  port                                = local.port
-  publicly_accessible                 = var.publicly_accessible
-  replicate_source_db                 = var.source_db
-  skip_final_snapshot                 = var.read_replica || var.skip_final_snapshot
-  snapshot_identifier                 = var.db_snapshot_id
-  storage_encrypted                   = var.storage_encrypted
-  storage_type                        = var.storage_type
-  tags                                = merge(var.tags, local.tags)
-  timezone                            = local.is_mssql ? var.timezone : null
-  username                            = var.username
-  vpc_security_group_ids              = var.security_groups
+  allocated_storage                     = local.storage_size
+  allow_major_version_upgrade           = false
+  apply_immediately                     = var.apply_immediately
+  auto_minor_version_upgrade            = var.auto_minor_version_upgrade
+  backup_retention_period               = var.read_replica ? 0 : var.backup_retention_period
+  backup_window                         = var.backup_window
+  character_set_name                    = local.is_oracle ? var.character_set_name : null
+  copy_tags_to_snapshot                 = var.copy_tags_to_snapshot
+  db_subnet_group_name                  = local.same_region_replica ? null : local.subnet_group
+  deletion_protection                   = var.enable_deletion_protection
+  enabled_cloudwatch_logs_exports       = var.cloudwatch_exports_logs_list
+  engine                                = var.engine
+  engine_version                        = local.engine_version
+  final_snapshot_identifier             = lower("${var.name}-final-snapshot${var.final_snapshot_suffix == "" ? "" : "-"}${var.final_snapshot_suffix}")
+  iam_database_authentication_enabled   = var.iam_authentication_enabled
+  identifier_prefix                     = "${lower(var.name)}-"
+  instance_class                        = var.instance_class
+  iops                                  = var.storage_iops
+  kms_key_id                            = var.kms_key_id
+  license_model                         = var.license_model == "" ? local.license_model : var.license_model
+  maintenance_window                    = var.maintenance_window
+  max_allocated_storage                 = var.max_storage_size
+  monitoring_interval                   = var.monitoring_interval
+  monitoring_role_arn                   = var.monitoring_interval > 0 ? local.monitoring_role_arn : null
+  multi_az                              = var.read_replica ? false : var.multi_az
+  name                                  = var.dbname
+  option_group_name                     = local.same_region_replica ? null : local.option_group
+  parameter_group_name                  = local.same_region_replica ? null : local.parameter_group
+  password                              = var.password
+  performance_insights_enabled          = local.performance_insights_enabled
+  performance_insights_kms_key_id       = local.performance_insights_enabled ? var.performance_insights_kms_key_id : null
+  performance_insights_retention_period = local.performance_insights_enabled ? local.performance_insights_retention_period : null
+  port                                  = local.port
+  publicly_accessible                   = var.publicly_accessible
+  replicate_source_db                   = var.source_db
+  skip_final_snapshot                   = var.read_replica || var.skip_final_snapshot
+  snapshot_identifier                   = var.db_snapshot_id
+  storage_encrypted                     = var.storage_encrypted
+  storage_type                          = var.storage_type
+  tags                                  = merge(var.tags, local.tags)
+  timezone                              = local.is_mssql ? var.timezone : null
+  username                              = var.username
+  vpc_security_group_ids                = var.security_groups
 
   timeouts {
     create = var.db_instance_create_timeout
