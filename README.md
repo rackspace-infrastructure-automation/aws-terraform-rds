@@ -56,6 +56,7 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 | backup\_retention\_period | The number of days for which automated backups are retained. Setting this parameter to a positive number enables backups. Setting this parameter to 0 disables automated backups. Compass best practice is 30 or more days. | `number` | `35` | no |
 | backup\_window | The daily time range during which automated backups are created if automated backups are enabled. | `string` | `"05:00-06:00"` | no |
 | character\_set\_name | (Optional) The character set name to use for DB encoding in Oracle instances. This can't be changed. See Oracle Character Sets Supported in Amazon RDS for more information. | `string` | `""` | no |
+| cloudwatch\_exports\_logs\_list | list of log exports to be enabled | `list(string)` | `[]` | no |
 | copy\_tags\_to\_snapshot | Indicates whether to copy all of the user-defined tags from the DB instance to snapshots of the DB instance. | `bool` | `true` | no |
 | create\_option\_group | A boolean variable noting if a new option group should be created. | `bool` | `true` | no |
 | create\_parameter\_group | A boolean variable noting if a new parameter group should be created. | `bool` | `true` | no |

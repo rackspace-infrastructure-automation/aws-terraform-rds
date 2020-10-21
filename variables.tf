@@ -52,6 +52,12 @@ variable "character_set_name" {
   default     = ""
 }
 
+variable "cloudwatch_exports_logs_list" {
+  description = "list of log exports to be enabled"
+  type        = list(string)
+  default     = []
+}
+
 variable "copy_tags_to_snapshot" {
   description = "Indicates whether to copy all of the user-defined tags from the DB instance to snapshots of the DB instance."
   type        = bool
