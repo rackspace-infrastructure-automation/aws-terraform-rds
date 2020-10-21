@@ -276,8 +276,8 @@ resource "aws_db_instance" "db_instance" {
   parameter_group_name                  = local.same_region_replica ? null : local.parameter_group
   password                              = var.password
   performance_insights_enabled          = local.performance_insights_enabled
-  performance_insights_kms_key_id       = var.performance_insights_kms_key_id
-  performance_insights_retention_period = local.performance_insights_retention_period
+  performance_insights_kms_key_id       = local.performance_insights_enabled ? var.performance_insights_kms_key_id : null
+  performance_insights_retention_period = local.performance_insights_enabled ? local.performance_insights_retention_period : null
   port                                  = local.port
   publicly_accessible                   = var.publicly_accessible
   replicate_source_db                   = var.source_db
