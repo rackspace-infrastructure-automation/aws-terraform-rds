@@ -6,7 +6,7 @@ This module creates an RDS instance.  It currently supports master, replica, and
 
 ```HCL
 module "rds" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.4"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.5"
 
   engine            = "mysql"                         #  Required
   instance_class    = "db.t2.large"                   #  Required
@@ -94,7 +94,7 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 | parameters | List of custom parameters to apply to the parameter group. | `list(map(string))` | `[]` | no |
 | password | Password for the local administrator account. | `string` | n/a | yes |
 | performance\_insights\_kms\_key\_id | KMS Key ID for performance insights (if retention specified). | `string` | `""` | no |
-| performance\_insights\_retention\_period | Retention duration for performance insights. Can be enabled with 7 or 731. | `number` | `0` | no |
+| performance\_insights\_retention\_period | Retention duration for performance insights. Can be enabled with one of the two AWS allowed values of 7 or 731.  See https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Enabling.html for further details. | `number` | `0` | no |
 | port | The port on which the DB accepts connections | `string` | `""` | no |
 | publicly\_accessible | Boolean value that indicates whether the database instance is an Internet-facing instance. | `bool` | `false` | no |
 | rackspace\_alarms\_enabled | Specifies whether non-emergency rackspace alarms will create a ticket. | `bool` | `false` | no |

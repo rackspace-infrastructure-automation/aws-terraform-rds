@@ -277,7 +277,7 @@ variable "performance_insights_kms_key_id" {
 }
 
 variable "performance_insights_retention_period" {
-  description = "Retention duration for performance insights. Can be enabled with 7 or 731."
+  description = "Retention duration for performance insights. Can be enabled with one of the two AWS allowed values of 7 or 731.  See https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Enabling.html for further details."
   type        = number
   default     = 0
 }

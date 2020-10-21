@@ -44,7 +44,7 @@ module "vpc_dr" {
 ####################################################################################################
 
 module "rds_master" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.4"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.5"
 
   ##################
   # Required Configuration
@@ -53,7 +53,7 @@ module "rds_master" {
   engine            = "mariadb"                     #  Required
   instance_class    = "db.t2.large"                 #  Required
   name              = "sample-mariadb-rds"          #  Required
-  password          = random_string.password.result #  Required - see usage warning at top of file 
+  password          = random_string.password.result #  Required - see usage warning at top of file
   security_groups   = [module.vpc.default_sg]       #  Required
   storage_encrypted = true                          #  Parameter defaults to false, but enabled for Cross Region Replication example
   subnets           = module.vpc.private_subnets    #  Required
@@ -133,7 +133,7 @@ module "rds_master" {
 ####################################################################################################
 
 module "rds_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.4"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.5"
 
   ##################
   # Required Configuration
@@ -224,7 +224,7 @@ data "aws_kms_alias" "rds_crr" {
 }
 
 module "rds_cross_region_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.4"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.5"
 
   #######################
   # Required parameters #

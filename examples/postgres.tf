@@ -43,7 +43,7 @@ module "vpc_dr" {
 ####################################################################################################
 
 module "rds_master" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.4"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.5"
 
   ##################
   # Required Configuration
@@ -133,7 +133,7 @@ module "rds_master" {
 ####################################################################################################
 
 module "rds_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.4"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.5"
 
   ##################
   # Required Configuration
@@ -224,7 +224,7 @@ data "aws_kms_alias" "rds_crr" {
 }
 
 module "rds_cross_region_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.4"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.5"
   #######################
   # Required parameters #
   #######################
