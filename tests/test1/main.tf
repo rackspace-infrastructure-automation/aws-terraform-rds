@@ -3,14 +3,14 @@ terraform {
 }
 
 provider "aws" {
-  version = "~> 2.7"
+  version = "~> 3.0"
   region  = "us-west-2"
 }
 
 provider "aws" {
   alias   = "ohio"
   region  = "us-east-2"
-  version = "~> 2.7"
+  version = "~> 3.0"
 }
 
 provider "random" {
