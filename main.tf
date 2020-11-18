@@ -292,7 +292,8 @@ resource "aws_db_instance" "db_instance" {
   engine_version                        = local.engine_version
   final_snapshot_identifier             = lower("${var.name}-final-snapshot${var.final_snapshot_suffix == "" ? "" : "-"}${var.final_snapshot_suffix}")
   iam_database_authentication_enabled   = var.iam_authentication_enabled
-  identifier_prefix                     = "${lower(var.name)}-"
+  identifier                            = var.name_is_wholename ? lower(var.name) : null
+  identifier_prefix                     = var.name_is_wholename ? null : "${lower(var.name)}-"
   instance_class                        = var.instance_class
   iops                                  = var.storage_iops
   kms_key_id                            = var.kms_key_id
