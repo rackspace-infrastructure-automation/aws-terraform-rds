@@ -6,7 +6,7 @@ This module creates an RDS instance.  It currently supports master, replica, and
 
 ```HCL
 module "rds" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.5"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.7"
 
   engine            = "mysql"                         #  Required
   instance_class    = "db.t2.large"                   #  Required
@@ -19,9 +19,6 @@ module "rds" {
 ```
 
 Full working references are available at [examples](examples)
-## Limitations
-
-- Terraform does not support joining a Microsoft SQL RDS instance to a Directory Service at this time.  This has been requested in https://github.com/terraform-providers/terraform-provider-aws/pull/5378 and can be added once that functionality is present.
 
 ## Terraform 0.12 upgrade
 
@@ -66,7 +63,9 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 | db\_instance\_update\_timeout | Timeout for datbabse modifications | `string` | `"80m"` | no |
 | db\_snapshot\_id | The name of a DB snapshot (optional). | `string` | `""` | no |
 | dbname | The DB name to create. If omitted, no database is created initially | `string` | `""` | no |
+| directory\_id | The ID of the Directory Service Active Directory domain.  Only applicable for Microsoft SQL engines. | `string` | `""` | no |
 | enable\_deletion\_protection | If the DB instance should have deletion protection enabled. The database can't be deleted when this value is set to true. The default is false. | `bool` | `false` | no |
+| enable\_domain\_join | Enable joining an Microsoft SQL Server RDS instance to an AD Directory Service. If enabled, a value must be provided for the `directory_id` variable. | `bool` | `false` | no |
 | engine | Database Engine Type.  Allowed values: mariadb, mysql, oracle-ee, oracle-se, oracle-se1, oracle-se2, postgres, sqlserver-ee, sqlserver-ex, sqlserver-se, sqlserver-web | `string` | n/a | yes |
 | engine\_version | Database Engine Minor Version http://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html | `string` | `""` | no |
 | environment | Application environment for which this network is being created. one of: ('Development', 'Integration', 'PreProduction', 'Production', 'QA', 'Staging', 'Test') | `string` | `"Development"` | no |

@@ -23,7 +23,7 @@ module "vpc" {
 }
 
 module "rds_mssql" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.5"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.7"
 
   ##################
   # Required Configuration
@@ -43,6 +43,14 @@ module "rds_mssql" {
 
   # create_subnet_group   = true
   # existing_subnet_group = "some-subnet-group-name"
+
+  ##################
+  # Microsoft Directory Service
+  ##################
+
+  # enable_domain_join = true
+  # directory_id       = module.msad.id
+
 
   ##################
   # Backups and Maintenance

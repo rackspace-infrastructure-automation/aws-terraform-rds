@@ -7,7 +7,7 @@
  *
  * ```HCL
  * module "rds" {
- *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.5"
+ *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.7"
  *
  *   engine            = "mysql"                         #  Required
  *   instance_class    = "db.t2.large"                   #  Required
@@ -20,9 +20,6 @@
  * ```
  *
  * Full working references are available at [examples](examples)
- * ## Limitations
- *
- * - Terraform does not support joining a Microsoft SQL RDS instance to a Directory Service at this time.  This has been requested in https://github.com/terraform-providers/terraform-provider-aws/pull/5378 and can be added once that functionality is present.
  *
  * ## Terraform 0.12 upgrade
  *
@@ -57,6 +54,8 @@ locals {
   is_postgres12 = local.engine_class == "postgres" && local.postgres_major_version == "12" # To allow setting postgresql specific settings
   is_oracle18   = local.engine_class == "oracle" && local.oracle_major_version == "18"     # To allow setting Oracle 18 specific settings
   is_oracle19   = local.engine_class == "oracle" && local.oracle_major_version == "19"     # To allow setting Oracle 19 specific settings
+
+  enable_domain_join = var.enable_domain_join && local.is_mssql
 
   # This map contains default values for several properties if they are explicitly defined.
   # Should be occasionally updated as newer engine versions are released
@@ -235,6 +234,36 @@ resource "aws_iam_role_policy_attachment" "enhanced_monitoring_policy" {
   role       = aws_iam_role.enhanced_monitoring_role[0].name
 }
 
+data "aws_iam_policy_document" "domain_join" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+
+    principals {
+      identifiers = ["rds.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}
+
+resource "aws_iam_role" "domain_join" {
+  count = var.enable_domain_join && local.is_mssql ? 1 : 0
+
+  assume_role_policy = data.aws_iam_policy_document.domain_join.json
+  name_prefix        = "${var.name}-domain-role-"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "domain_join" {
+  count = var.enable_domain_join && local.is_mssql ? 1 : 0
+
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSDirectoryServiceAccess"
+  role       = aws_iam_role.domain_join[0].name
+}
+
 locals {
   subnet_group                          = length(aws_db_subnet_group.db_subnet_group.*.id) > 0 ? aws_db_subnet_group.db_subnet_group[0].id : var.existing_subnet_group
   parameter_group                       = length(aws_db_parameter_group.db_parameter_group.*.id) > 0 ? aws_db_parameter_group.db_parameter_group[0].id : var.existing_parameter_group_name
@@ -256,6 +285,8 @@ resource "aws_db_instance" "db_instance" {
   copy_tags_to_snapshot                 = var.copy_tags_to_snapshot
   db_subnet_group_name                  = local.same_region_replica ? null : local.subnet_group
   deletion_protection                   = var.enable_deletion_protection
+  domain                                = local.enable_domain_join ? var.directory_id : null
+  domain_iam_role_name                  = local.enable_domain_join ? aws_iam_role.domain_join[0].name : null
   enabled_cloudwatch_logs_exports       = var.cloudwatch_exports_logs_list
   engine                                = var.engine
   engine_version                        = local.engine_version
@@ -299,6 +330,7 @@ resource "aws_db_instance" "db_instance" {
   # Option Group, Parameter Group, and Subnet Group added as the coalesce to use any existing groups seems to throw off
   # dependancies while destroying resources
   depends_on = [
+    aws_iam_role_policy_attachment.domain_join,
     aws_iam_role_policy_attachment.enhanced_monitoring_policy,
     aws_db_option_group.db_option_group,
     aws_db_parameter_group.db_parameter_group,
