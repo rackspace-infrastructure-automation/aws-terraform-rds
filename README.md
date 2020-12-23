@@ -6,7 +6,7 @@ This module creates an RDS instance.  It currently supports master, replica, and
 
 ```HCL
 module "rds" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.7"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.12.8"
 
   engine            = "mysql"                         #  Required
   instance_class    = "db.t2.large"                   #  Required
