@@ -7,7 +7,7 @@
  *
  * ```HCL
  * module "rds" {
- *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.13"
+ *   source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.14"
  *
  *   subnets           = "${module.vpc.private_subnets}" #  Required
  *   security_groups   = ["${module.vpc.default_sg}"]    #  Required
@@ -35,42 +35,44 @@
  */
 
 locals {
-  engine_class  = "${element(split("-",var.engine), 0)}"
-  is_mssql      = "${local.engine_class == "sqlserver"}"                                         # To allow setting MSSQL specific settings
-  is_oracle     = "${local.engine_class == "oracle"}"                                            # To allow setting Oracle specific settings
-  is_postgres   = "${local.engine_class == "postgres"}"
-  is_postgres10 = "${local.engine_class == "postgres" && local.postgres_major_version == "10" }" # To allow setting postgresql specific settings
-  is_postgres11 = "${local.engine_class == "postgres" && local.postgres_major_version == "11" }" # To allow setting postgresql specific settings
-  is_oracle18   = "${local.engine_class == "oracle" && local.oracle_major_version == "18" }"     # To allow setting Oracle specific settings
+  engine_class = "${element(split("-",var.engine), 0)}"
+  is_mssql     = "${local.engine_class == "sqlserver"}" # To allow setting MSSQL specific settings
+  is_oracle    = "${local.engine_class == "oracle"}"    # To allow setting Oracle specific settings
+  is_postgres  = "${local.engine_class == "postgres"}"
+
+  is_single_major_version = "${contains(lookup(local.engine_defaults[local.engine_class], "single_major_version", []),
+                                        element(split(".",local.engine_version), 0))}"
 
   # This map contains default values for several properties if they are explicitly defined.
   # Should be occasionally updated as newer engine versions are released
   engine_defaults = {
     mariadb = {
-      version = "10.3.13"
+      version = "10.4.13"
     }
 
     mysql = {
-      version = "5.7.26"
+      version = "8.0.21"
     }
 
     oracle = {
-      port         = "1521"
-      version      = "18.0.0.0.ru-2019-07.rur-2019-07.r1"
-      storage_size = "100"
-      license      = "license-included"
-      jdbc_proto   = "oracle:thin"
+      port                 = "1521"
+      version              = "19.0.0.0.ru-2020-10.rur-2020-10.r1"
+      storage_size         = "100"
+      license              = "license-included"
+      jdbc_proto           = "oracle:thin"
+      single_major_version = ["18", "19"]
     }
 
     postgres = {
-      port       = "5432"
-      version    = "11.5"
-      jdbc_proto = "postgresql"
+      port                 = "5432"
+      version              = "12.4"
+      jdbc_proto           = "postgresql"
+      single_major_version = ["10", "11", "12"]
     }
 
     sqlserver = {
       port         = "1433"
-      version      = "14.00.3049.1.v1"
+      version      = "15.00.4043.16.v1"
       storage_size = "200"
       license      = "license-included"
       jdbc_proto   = "sqlserver"
@@ -83,10 +85,8 @@ locals {
 
   port = "${coalesce(var.port, lookup(local.engine_defaults[local.engine_class], "port", "3306"))}"
 
-  storage_size           = "${coalesce(var.storage_size, lookup(local.engine_defaults[local.engine_class], "storage_size", 10))}"
-  engine_version         = "${coalesce(var.engine_version, lookup(local.engine_defaults[local.engine_class], "version"))}"
-  postgres_major_version = "${element(split(".",local.engine_version), 0)}"
-  oracle_major_version   = "${element(split(".",local.engine_version), 0)}"
+  storage_size   = "${coalesce(var.storage_size, lookup(local.engine_defaults[local.engine_class], "storage_size", 10))}"
+  engine_version = "${coalesce(var.engine_version, lookup(local.engine_defaults[local.engine_class], "version"))}"
 
   license_model = "${coalesce(var.license_model, lookup(local.engine_defaults[local.engine_class], "license", ""))}"
 
@@ -100,9 +100,9 @@ locals {
   parameter_lookup = "${var.timezone == "" || local.is_mssql ? "none":"timezone"}"
 
   parameters {
-    "none" = []
+    none = []
 
-    "timezone" = [{
+    timezone = [{
       name  = "${local.is_postgres ? "timezone": "time_zone"}"
       value = "${var.timezone}"
     }]
@@ -114,7 +114,7 @@ locals {
 
   # Break up the engine version in to chunks to get the major version part.  This is a single number for PostgreSQL10/11
   # and two numbers for all other engines (ex: 5.7).
-  version_chunk = "${chunklist(split(".", local.engine_version), local.is_postgres10 || local.is_postgres11 || local.is_oracle18 ? 1 : 2)}"
+  version_chunk = "${chunklist(split(".", local.engine_version), local.is_single_major_version ? 1 : 2)}"
 
   major_version = "${join(".", local.version_chunk[0])}"
 
@@ -205,10 +205,11 @@ resource "aws_iam_role_policy_attachment" "enhanced_monitoring_policy" {
 }
 
 locals {
-  subnet_group        = "${coalesce(var.existing_subnet_group, join("", aws_db_subnet_group.db_subnet_group.*.id))}"
-  parameter_group     = "${coalesce(var.existing_parameter_group_name, join("", aws_db_parameter_group.db_parameter_group.*.id))}"
-  option_group        = "${coalesce(var.existing_option_group_name, join("", aws_db_option_group.db_option_group.*.id))}"
-  monitoring_role_arn = "${coalesce(var.existing_monitoring_role, join("", aws_iam_role.enhanced_monitoring_role.*.arn))}"
+  subnet_group          = "${coalesce(var.existing_subnet_group, join("", aws_db_subnet_group.db_subnet_group.*.id))}"
+  parameter_group       = "${coalesce(var.existing_parameter_group_name, join("", aws_db_parameter_group.db_parameter_group.*.id))}"
+  option_group          = "${coalesce(var.existing_option_group_name, join("", aws_db_option_group.db_option_group.*.id))}"
+  monitoring_role_arn   = "${coalesce(var.existing_monitoring_role, join("", aws_iam_role.enhanced_monitoring_role.*.arn))}"
+  final_snapshot_suffix = "-${lower(var.final_snapshot_suffix)}"
 }
 
 resource "aws_db_instance" "db_instance" {
@@ -251,7 +252,7 @@ resource "aws_db_instance" "db_instance" {
   maintenance_window          = "${var.maintenance_window}"
   skip_final_snapshot         = "${var.read_replica || var.skip_final_snapshot}"
   copy_tags_to_snapshot       = "${var.copy_tags_to_snapshot}"
-  final_snapshot_identifier   = "${lower(var.name)}-final-snapshot${var.final_snapshot_suffix == "" ? "" : "-${lower(var.final_snapshot_suffix)}"}"
+  final_snapshot_identifier   = "${lower(var.name)}-final-snapshot${var.final_snapshot_suffix == "" ? "" : local.final_snapshot_suffix}"
   backup_retention_period     = "${var.read_replica ? 0 : var.backup_retention_period}"
   backup_window               = "${var.backup_window}"
   apply_immediately           = "${var.apply_immediately}"

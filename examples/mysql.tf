@@ -36,7 +36,7 @@ module "vpc_dr" {
 ####################################################################################################
 
 module "rds_master" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.13"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.14"
 
   ##################
   # Required Configuration
@@ -125,7 +125,7 @@ module "rds_master" {
 ####################################################################################################
 
 module "rds_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.13"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.14"
 
   ##################
   # Required Configuration
@@ -216,7 +216,7 @@ data "aws_kms_alias" "rds_crr" {
 }
 
 module "rds_cross_region_replica" {
-  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.13"
+  source = "git@github.com:rackspace-infrastructure-automation/aws-terraform-rds?ref=v0.0.14"
 
   providers = {
     aws = "aws.oregon"
