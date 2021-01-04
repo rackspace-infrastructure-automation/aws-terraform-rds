@@ -60,7 +60,7 @@ module "vpc_dr" {
 ########################
 #         MySQL        #
 ########################
-module "rds_mysql_latest" {
+module "rds_mysql_8" {
   source = "../../module"
 
   create_option_group = false
@@ -77,7 +77,7 @@ module "rds_mysql_latest" {
 ########################
 #       Replica        #
 ########################
-module "rds_replica_latest" {
+module "rds_replica_8" {
   source = "../../module"
 
   create_option_group    = false
@@ -89,7 +89,7 @@ module "rds_replica_latest" {
   password               = ""
   read_replica           = true
   security_groups        = [module.vpc.default_sg]
-  source_db              = module.rds_mysql_latest.db_instance
+  source_db              = module.rds_mysql_8.db_instance
   storage_encrypted      = true
   subnets                = module.vpc.private_subnets
 }
@@ -103,7 +103,7 @@ data "aws_kms_alias" "rds_crr" {
   name     = "alias/aws/rds"
 }
 
-module "rds_cross_region_replica_latest" {
+module "rds_cross_region_replica_8" {
   source = "../../module"
 
   engine            = "mysql"
@@ -113,7 +113,7 @@ module "rds_cross_region_replica_latest" {
   password          = ""
   read_replica      = true
   security_groups   = [module.vpc_dr.default_sg]
-  source_db         = module.rds_mysql_latest.db_instance_arn
+  source_db         = module.rds_mysql_8.db_instance_arn
   storage_encrypted = true
   subnets           = module.vpc_dr.private_subnets
 
@@ -125,7 +125,7 @@ module "rds_cross_region_replica_latest" {
 ########################
 #       MariaDB        #
 ########################
-module "rds_mariadb_latest" {
+module "rds_mariadb_10_4" {
   source = "../../module"
 
   create_option_group = false
@@ -142,7 +142,7 @@ module "rds_mariadb_latest" {
 ########################
 #        MS SQL        #
 ########################
-module "rds_mssql_latest" {
+module "rds_mssql_15" {
   source = "../../module"
 
   create_option_group = false
@@ -158,21 +158,6 @@ module "rds_mssql_latest" {
 ########################
 #        Oracle        #
 ########################
-
-# oracle 18
-module "rds_oracle_18" {
-  source = "../../module"
-
-  create_option_group = false
-  engine              = "oracle-se2"
-  engine_version      = "18.0.0.0.ru-2019-07.rur-2019-07.r1"
-  instance_class      = "db.t3.large"
-  name                = "oracle18-${random_string.identifier.result}"
-  password            = random_string.password.result
-  security_groups     = [module.vpc.default_sg]
-  skip_final_snapshot = true
-  subnets             = module.vpc.private_subnets
-}
 
 # defaults to oracle 19
 module "rds_oracle_19" {
@@ -191,7 +176,7 @@ module "rds_oracle_19" {
 ########################
 #       Postgres       #
 ########################
-module "rds_postgres_latest" {
+module "rds_postgres_12" {
   source = "../../module"
 
   create_option_group = false
