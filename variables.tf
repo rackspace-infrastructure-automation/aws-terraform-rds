@@ -53,7 +53,7 @@ variable "character_set_name" {
 }
 
 variable "cloudwatch_exports_logs_list" {
-  description = "list of log exports to be enabled"
+  description = "List of log types to export to cloudwatch. If omitted, no logs will be exported. The following log types are supported: `audit`, `error`, `general`, `slowquery`."
   type        = list(string)
   default     = []
 }
