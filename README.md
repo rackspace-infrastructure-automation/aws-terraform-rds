@@ -34,16 +34,49 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 	- cpu\_high\_alarm\_email
 	- replica\_lag\_alarm\_email
 
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 0.12 |
+| aws | >= 2.7.0 |
+
 ## Providers
 
 | Name | Version |
 |------|---------|
 | aws | >= 2.7.0 |
 
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| cpu_high_alarm_email | git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=0.12.6 |  |
+| free_storage_space_alarm_email | git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=0.12.6 |  |
+| free_storage_space_alarm_ticket | git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=0.12.6 |  |
+| read_iops_high_alarm_email | git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=0.12.6 |  |
+| replica_lag_alarm_email | git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=0.12.6 |  |
+| replica_lag_alarm_ticket | git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=0.12.6 |  |
+| write_iops_high_alarm_email | git@github.com:rackspace-infrastructure-automation/aws-terraform-cloudwatch_alarm//?ref=0.12.6 |  |
+
+## Resources
+
+| Name |
+|------|
+| [aws_db_event_subscription](https://registry.terraform.io/providers/hashicorp/aws/2.7.0/docs/resources/db_event_subscription) |
+| [aws_db_instance](https://registry.terraform.io/providers/hashicorp/aws/2.7.0/docs/resources/db_instance) |
+| [aws_db_option_group](https://registry.terraform.io/providers/hashicorp/aws/2.7.0/docs/resources/db_option_group) |
+| [aws_db_parameter_group](https://registry.terraform.io/providers/hashicorp/aws/2.7.0/docs/resources/db_parameter_group) |
+| [aws_db_subnet_group](https://registry.terraform.io/providers/hashicorp/aws/2.7.0/docs/resources/db_subnet_group) |
+| [aws_iam_policy_document](https://registry.terraform.io/providers/hashicorp/aws/2.7.0/docs/data-sources/iam_policy_document) |
+| [aws_iam_role](https://registry.terraform.io/providers/hashicorp/aws/2.7.0/docs/resources/iam_role) |
+| [aws_iam_role_policy_attachment](https://registry.terraform.io/providers/hashicorp/aws/2.7.0/docs/resources/iam_role_policy_attachment) |
+| [aws_route53_record](https://registry.terraform.io/providers/hashicorp/aws/2.7.0/docs/resources/route53_record) |
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:-----:|
+|------|-------------|------|---------|:--------:|
 | alarm\_cpu\_limit | CloudWatch CPUUtilization Threshold | `number` | `60` | no |
 | alarm\_free\_space\_limit | CloudWatch Free Storage Space Limit Threshold (Bytes) | `number` | `1024000000` | no |
 | alarm\_read\_iops\_limit | CloudWatch Read IOPSLimit Threshold | `number` | `100` | no |
@@ -125,4 +158,3 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 | option\_group | The Option Group used by the DB Instance |
 | parameter\_group | The Parameter Group used by the DB Instance |
 | subnet\_group | The DB Subnet Group used by the DB Instance |
-
