@@ -74,6 +74,24 @@ module "rds_mysql_8" {
   subnets             = module.vpc.private_subnets
 }
 
+
+###### Full indentifier provided ########
+module "rds_mysql_whole_indentifier" {
+  source = "../../module"
+
+  create_option_group = false
+  engine              = "mysql"
+  instance_class      = "db.t3.large"
+  name                = "mysql-noprefix-${random_string.identifier.result}"
+  name_is_wholename   = true
+  password            = random_string.password.result
+  security_groups     = [module.vpc.default_sg]
+  skip_final_snapshot = true
+  storage_encrypted   = true
+  subnets             = module.vpc.private_subnets
+}
+
+
 ########################
 #       Replica        #
 ########################

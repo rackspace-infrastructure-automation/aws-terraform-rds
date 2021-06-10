@@ -120,7 +120,8 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 | max\_storage\_size | Select Max RDS Volume Size in GB. Value other than 0 will enable storage autoscaling | `number` | `0` | no |
 | monitoring\_interval | The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. To disable collecting Enhanced Monitoring metrics, specify 0. The default is 0. Valid Values: 0, 1, 5, 10, 15, 30, 60. | `number` | `0` | no |
 | multi\_az | Create a multi-AZ RDS database instance | `bool` | `true` | no |
-| name | The name prefix to use for the resources created in this module. | `string` | n/a | yes |
+| name | The name to use for the resources created in this module. This is interpreted differently depending on the 'name\_is\_wholename' variable, but only for the instance name, all other resources treat the value as a prefix. | `string` | n/a | yes |
+| name\_is\_wholename | If 'false'  the 'name' variable is treated as a prefix, otherwise it is treated as the wholename for the db\_instance only - other resources still use it as a prefix. This variable eases the process of importing a db instance into the module's namespace (e.g.in a restore situation). | `bool` | `false` | no |
 | notification\_topic | SNS Topic ARN to use for customer notifications from CloudWatch alarms. (OPTIONAL) | `string` | `""` | no |
 | options | List of custom options to apply to the option group. | `list` | `[]` | no |
 | parameters | List of custom parameters to apply to the parameter group. | `list(map(string))` | `[]` | no |
