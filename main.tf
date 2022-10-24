@@ -247,6 +247,8 @@ resource "aws_db_instance" "db_instance" {
   monitoring_interval = "${var.monitoring_interval}"
   monitoring_role_arn = "${local.monitoring_role_arn}"
 
+  performance_insights_enabled = "${var.performance_insights}"
+
   allow_major_version_upgrade = false
   auto_minor_version_upgrade  = "${var.auto_minor_version_upgrade}"
   maintenance_window          = "${var.maintenance_window}"
