@@ -87,6 +87,7 @@ Using [aws-terraform-cloudwatch\_alarm](https://github.com/rackspace-infrastruct
 | options | List of custom options to apply to the option group. | `list` | `[]` | no |
 | parameters | List of custom parameters to apply to the parameter group. | `list` | `[]` | no |
 | password | Password for the local administrator account. | `string` | n/a | yes |
+| performance\_insights | Whether or not we enable AWS Performance Insights for the DB Instance | `string` | "false" | no|
 | port | The port on which the DB accepts connections | `string` | `""` | no |
 | publicly\_accessible | Boolean value that indicates whether the database instance is an Internet-facing instance. | `string` | `false` | no |
 | rackspace\_alarms\_enabled | Specifies whether non-emergency rackspace alarms will create a ticket. | `string` | `false` | no |

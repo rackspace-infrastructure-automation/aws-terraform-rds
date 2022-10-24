@@ -215,6 +215,12 @@ variable "storage_encrypted" {
   default     = false
 }
 
+variable "performance_insights" {
+  description = "Whether or not we enable AWS Performance Insights for the DB Instance"
+  type        = "string"
+  default     = false
+}
+
 # Monitoring
 
 variable "alarm_cpu_limit" {
