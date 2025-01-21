@@ -1,3 +1,6 @@
+> [!CAUTION]
+> This project is end of life. This repo will be deleted on June 2nd 2025.
+
 # aws-terraform-rds
 
 This module creates an RDS instance.  It currently supports master, replica, and cross region replica RDS instances.
